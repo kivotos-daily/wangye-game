@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v2.5</title>
+    <title>十五网页游戏大厅 - v3.0</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -14,47 +14,35 @@
         /* ==================== 1. 开场动画 CSS ==================== */
         #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
         #intro-screen.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
-
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
         @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
-
         .fade-text { font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; transform: scale(0.9); position: absolute; }
         .fade-text.show { opacity: 1; transform: scale(1); }
-        
         .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; width: 100%; height: 100%; padding: 20px; transform: translateY(20px); }
         .intro-img-group.show { opacity: 1; transform: translateY(0); }
-        
         .intro-img-group img { max-width: 80%; max-height: 35vh; margin-bottom: 10px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-
         .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
-
         .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; z-index: 210; transition: 0.3s; backdrop-filter: blur(5px); }
         .skip-btn:hover { background: rgba(255,255,255,0.3); }
 
         /* ==================== 2. 游戏大厅主菜单 CSS ==================== */
         #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #0f0c29; background: linear-gradient(to right, #240b36, #0f0c29); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 150; opacity: 0; transform: scale(0.95); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
         #menu-screen.show { opacity: 1; transform: scale(1); }
-        
-        /* 赛博网格背景 */
         .menu-bg-grid { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background-image: linear-gradient(rgba(0, 255, 204, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 204, 0.2) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg); transform-origin: bottom; animation: gridMove 3s linear infinite; z-index: 1; }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
 
-        /* 顶部按钮区 */
-        .menu-top-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 10; }
-        .top-btn { background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.3s; font-weight: bold; position: relative; display: flex; align-items: center; gap: 5px; }
-        .top-btn:hover { background: rgba(0, 255, 204, 0.2); box-shadow: 0 0 10px rgba(0,255,204,0.5); }
-        
-        /* 玩前必看角标 */
-        .badge { position: absolute; top: -10px; right: -10px; background: #ff3333; color: white; font-size: 10px; padding: 3px 6px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: pulse 1s infinite alternate; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        .btn-fullscreen { position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 10; transition: 0.3s; font-weight: bold; }
+        .btn-fullscreen:hover { background: rgba(0, 255, 204, 0.2); }
+
+        /* 战绩展示 */
+        .win-record { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #ffd700; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #ffd700; font-weight: bold; z-index: 10; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
 
         .menu-title { position: relative; z-index: 2; font-size: 4vw; font-weight: bold; color: #fff; margin-bottom: 10px; margin-top: -30px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
-        .menu-subtitle { position: relative; z-index: 2; font-size: 1.2vw; color: #00ffcc; margin-bottom: 40px; letter-spacing: 4px; }
+        .menu-subtitle { position: relative; z-index: 2; font-size: 1.2vw; color: #00ffcc; margin-bottom: 40px; letter-spacing: 4px; cursor: pointer; } /* 隐藏彩蛋：点这个10次 */
         
-        .menu-grid { position: relative; z-index: 2; display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 90%; }
+        .menu-grid { position: relative; z-index: 2; display: flex; gap: 20px; align-items: center; justify-content: center; max-width: 95%; }
         
-        /* 缩小卡片尺寸 */
         .menu-card { width: 210px; height: 260px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); position: relative; overflow: hidden; }
         .menu-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-25deg); transition: 0.5s; }
         .menu-card:hover::before { left: 150%; }
@@ -62,31 +50,33 @@
         
         .menu-card.active { border-color: #00ffcc; background: rgba(0, 255, 204, 0.1); box-shadow: 0 0 20px rgba(0,255,204,0.2); }
         .menu-card.active:hover { box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 30px rgba(0,255,204,0.4); }
-        .menu-card.locked { cursor: not-allowed; opacity: 0.5; filter: grayscale(1); }
-        .menu-card.locked:hover { transform: none; box-shadow: none; }
-        .menu-card.locked:hover::before { left: -100%; }
         
         .card-icon { font-size: 60px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
         .card-title { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 8px; letter-spacing: 2px; }
         .card-desc { font-size: 13px; color: #aaa; text-align: center; padding: 0 15px; line-height: 1.4; }
-        .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #ff4d4d; }
 
-        /* ==================== 模态弹窗系统 (公告/FAQ) ==================== */
+        .side-actions { display: flex; flex-direction: column; gap: 10px; height: 260px; }
+        .side-btn { width: 120px; flex: 1; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px); position: relative; }
+        .side-btn:hover { background: rgba(0, 255, 204, 0.15); border-color: #00ffcc; transform: scale(1.05); }
+        .side-btn-icon { font-size: 30px; margin-bottom: 5px; }
+        .side-btn-text { font-size: 16px; font-weight: bold; color: #fff; }
+        
+        .badge { position: absolute; top: -8px; right: -8px; background: #ff3333; color: white; font-size: 11px; padding: 3px 8px; border-radius: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: pulse 1s infinite alternate; z-index: 5; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* ==================== 3. 模态弹窗系统 ==================== */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 500; opacity: 0; transition: opacity 0.3s; }
         .modal-overlay.show { display: flex; opacity: 1; }
         .modal-box { background: #1e1e2f; border: 2px solid #00ffcc; border-radius: 15px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,255,204,0.3); transform: translateY(20px); transition: transform 0.3s; }
         .modal-overlay.show .modal-box { transform: translateY(0); }
-        
         .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .modal-title { font-size: 20px; font-weight: bold; color: #00ffcc; }
         .modal-close { background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .modal-close:hover { color: #fff; transform: scale(1.1); }
-        
         .modal-content { padding: 20px; overflow-y: auto; color: #ddd; line-height: 1.6; font-size: 14px; }
         .modal-content h4 { color: #ffd700; margin-top: 15px; margin-bottom: 5px; font-size: 16px; }
-        .modal-content p { margin-bottom: 10px; }
 
-        /* ==================== 3. 选人界面 CSS ==================== */
+        /* ==================== 4. 选人界面 CSS ==================== */
         #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.5s ease-out, transform 0.5s ease-out; opacity: 0; transform: translateY(20px); }
         #select-screen.show { opacity: 1; transform: translateY(0); }
 
@@ -126,7 +116,7 @@
         .btn-action:active { transform: translateY(4px); box-shadow: none; }
         .btn-back { background: #666; color: #fff; box-shadow: 0 4px 0 #333; }
 
-        /* ==================== 4. 战斗界面 ==================== */
+        /* ==================== 5. 战斗界面 ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
         .top-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 20px 0; width: 100%; }
         .hud-player { width: 40%; display: flex; align-items: center; gap: 10px; }
@@ -143,17 +133,18 @@
         .hud-player.right .bar-container.energy { margin-left: auto; }
         .bar-energy { height: 100%; background: linear-gradient(to right, #00ccff, #00ffff); width: 0%; transition: width 0.1s; }
         .hud-player.right .bar-energy { background: linear-gradient(to left, #00ccff, #00ffff); margin-left: auto; }
-        
         .center-hud { display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .timer-box { background: #ffd700; color: #000; font-size: 30px; font-weight: bold; width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid #fff; margin-top: 5px; }
         
-        .btn-quit { pointer-events: auto; background: rgba(255, 50, 50, 0.8); color: white; border: 2px solid white; padding: 5px 15px; border-radius: 15px; font-size: 14px; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        .btn-quit:hover { background: red; transform: scale(1.05); }
+        .result-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; z-index: 20; backdrop-filter: blur(5px); }
+        .result-title { font-size: 50px; font-weight: bold; color: #ffd700; text-shadow: 0 0 20px #ffd700; margin-bottom: 30px; }
+        .result-btns { display: flex; gap: 20px; }
+        .btn-result { background: #00ffcc; color: #000; font-size: 24px; font-weight: bold; padding: 10px 40px; border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 5px 0 #009999; transition: 0.1s; }
+        .btn-result:active { transform: translateY(5px); box-shadow: none; }
+        .btn-result.quit { background: #ff4d4d; box-shadow: 0 5px 0 #990000; color: #fff; }
 
-        /* 触屏控制器（完美镜像版） */
-        #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; justify-content: space-between; align-items: flex-end; padding: 20px; }
+        #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; justify-content: space-between; align-items: flex-end; padding: 20px; z-index: 15; }
         .control-side { display: flex; align-items: flex-end; gap: 20px; pointer-events: auto; }
-        
         .joystick { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); position: relative; }
         .joy-btn { position: absolute; width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 18px; }
         .joy-btn:active { background: rgba(255,255,255,0.6); }
@@ -161,67 +152,30 @@
         .joy-down { bottom: 0; left: 40px; height: 35px; border-radius: 0 0 8px 8px; }
         .joy-left { top: 40px; left: 0; width: 35px; border-radius: 8px 0 0 8px; }
         .joy-right { top: 40px; right: 0; width: 35px; border-radius: 0 8px 8px 0; }
-
         .action-btns { display: grid; grid-template-columns: 60px 60px; grid-template-rows: 60px 60px; gap: 8px; }
         .act-btn { border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: bold; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
         .act-btn:active { transform: scale(0.95); }
-        
-        /* P1 的按键排布 */
         .control-side:first-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; }
         .control-side:first-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; }
         .control-side:first-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; }
-
-        /* P2 的按键排布（完美镜像） */
         .control-side:last-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 2; }
         .control-side:last-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 1; color: #000; }
         .control-side:last-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 1; }
+
+        /* ==================== 6. 十五消消乐 CSS ==================== */
+        #match3-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #2b1b54, #0f0c29); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 120; opacity: 0; transition: opacity 0.3s; }
+        #match3-screen.show { opacity: 1; }
+        .m3-header { display: flex; justify-content: space-between; width: 80%; max-width: 500px; margin-bottom: 20px; align-items: center; }
+        .m3-score { font-size: 24px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .m3-back { background: #666; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .m3-canvas-box { background: rgba(0,0,0,0.6); border: 2px solid #00ffcc; border-radius: 15px; padding: 10px; box-shadow: 0 0 30px rgba(0,255,204,0.3); }
+        /* 适应移动端缩小画布 */
+        #m3Canvas { width: 100%; max-width: 480px; aspect-ratio: 1/1; display: block; touch-action: none; }
     </style>
 </head>
 <body>
     <div id="game-container">
         
-        <!-- 模态弹窗：公告 -->
-        <div class="modal-overlay" id="modal-notice">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <div class="modal-title">📢 游戏公告</div>
-                    <button class="modal-close" onclick="closeModal('modal-notice')">×</button>
-                </div>
-                <div class="modal-content">
-                    <h4>🎉 v2.5 震撼更新：</h4>
-                    <p>1. **UI 全面优化**：缩小了主界面的卡片尺寸，排版更精致美观，不再拥挤。</p>
-                    <p>2. **新增独立弹窗**：公告和常见问题改为弹窗显示，点击按钮即可查看。</p>
-                    <p>3. **新增“玩前必看”FAQ**：集中解答了关于操作、图片加载、卡顿等常见疑问。</p>
-                    <p>4. **战斗按键完美镜像**：P1 与 P2 的防、拍、必杀按键现在呈完美的轴对称排列，同屏对战更顺手。</p>
-                    <p>5. **加载极速优化**：大幅降低了图片后台处理的消耗，彻底告别白屏和卡顿。</p>
-                    <p>6. **角色详细资料**：选人界面的技能介绍已全面扩写，包含定位、被动、大招及玩法点评。</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- 模态弹窗：常见问题 -->
-        <div class="modal-overlay" id="modal-faq">
-            <div class="modal-box">
-                <div class="modal-header">
-                    <div class="modal-title">❓ 常见问题解答</div>
-                    <button class="modal-close" onclick="closeModal('modal-faq')">×</button>
-                </div>
-                <div class="modal-content">
-                    <h4>Q1: 怎么在同一个设备上双人对战？</h4>
-                    <p>A: **电脑端**：P1 使用 W/A/S/D 移动，J 普攻，K 必杀；P2 使用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机/平板**：屏幕左右两侧会自动出现对应的虚拟按键。</p>
-                    
-                    <h4>Q2: 为什么战斗里角色变成了彩色方块？</h4>
-                    <p>A: 这通常是因为图片还在后台下载或抠图。稍等片刻即可自动恢复。如果一直不显示，请检查你上传的图片文件名是否严格为 `char1.png` ~ `char5.png`（注意大小写）。</p>
-                    
-                    <h4>Q3: 为什么我的大招放不出来？</h4>
-                    <p>A: 注意看屏幕左上/右上的**蓝色能量条**。只有能量条全满时（双马尾角色只需 40%），按必杀键才能成功释放大招。</p>
-                    
-                    <h4>Q4: 如何防御？防御会掉血吗？</h4>
-                    <p>A: 按住“防”键即可举起护盾。防御状态下，受到的普通伤害会减少 80%，但仍会被特殊技能（如吕布的大招）扣除百分比血量。</p>
-                </div>
-            </div>
-        </div>
-
         <!-- 开场动画层 -->
         <div id="intro-screen">
             <div class="stars"></div>
@@ -237,41 +191,47 @@
         <!-- 大厅主界面 -->
         <div id="menu-screen">
             <div class="menu-bg-grid"></div>
-            
-            <!-- 顶部操作区 -->
-            <div class="menu-top-actions">
-                <button class="top-btn" onclick="openModal('modal-notice')">📢 公告</button>
-                <button class="top-btn" onclick="openModal('modal-faq')">
-                    ❓ 常见问题
-                    <span class="badge">玩前必看！</span>
-                </button>
-            </div>
+            <button class="btn-fullscreen" onclick="App.toggleFullscreen()">🔍 全屏模式</button>
+            <div class="win-record" id="win-record-display">战绩加载中...</div>
 
             <div class="menu-title">十五游戏大厅</div>
-            <div class="menu-subtitle">CYBER GAME STATION</div>
+            <div class="menu-subtitle" id="secret-trigger">CYBER GAME STATION</div>
             
             <div class="menu-grid">
+                <!-- 十五格斗 -->
                 <div class="menu-card active" onclick="App.openGame('fighting')">
                     <div class="card-icon">🥊</div>
                     <div class="card-title">十五格斗</div>
                     <div class="card-desc">双人同屏对战<br>绿幕实时抠图引擎</div>
                 </div>
-                <div class="menu-card locked">
-                    <div class="lock-icon">🔒</div>
+                <!-- 十五消消乐 (已解锁) -->
+                <div class="menu-card active" onclick="App.openGame('match3')">
                     <div class="card-icon">🍬</div>
                     <div class="card-title">十五消消乐</div>
-                    <div class="card-desc">敬请期待</div>
+                    <div class="card-desc">经典三消玩法<br>全角色方块乱斗</div>
                 </div>
+                <!-- 十五斗地主 (未解锁) -->
                 <div class="menu-card locked">
-                    <div class="lock-icon">🔒</div>
                     <div class="card-icon">🃏</div>
                     <div class="card-title">十五斗地主</div>
                     <div class="card-desc">敬请期待</div>
                 </div>
+
+                <div class="side-actions">
+                    <div class="side-btn" onclick="openModal('modal-notice')">
+                        <div class="side-btn-icon">📢</div>
+                        <div class="side-btn-text">公告</div>
+                    </div>
+                    <div class="side-btn" onclick="openModal('modal-faq')">
+                        <div class="side-btn-icon">❓</div>
+                        <div class="side-btn-text">常见问题</div>
+                        <span class="badge">玩前必看！</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- 渲染画布 -->
+        <!-- 战斗渲染画布 -->
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
 
         <!-- 战斗 UI -->
@@ -287,7 +247,6 @@
                 </div>
                 <div class="center-hud">
                     <div class="timer-box" id="timer-text">99</div>
-                    <button class="btn-quit" onclick="App.backToMenu()">退出</button>
                 </div>
                 <div class="hud-player right">
                     <div class="hud-avatar" id="p2-hud-avatar"></div>
@@ -298,9 +257,17 @@
                     </div>
                 </div>
             </div>
+
+            <div class="result-overlay" id="result-overlay">
+                <div class="result-title" id="result-text">1P 胜利!</div>
+                <div class="result-btns">
+                    <button class="btn-result" onclick="UI.restartGame()">再战一局</button>
+                    <button class="btn-result quit" onclick="App.backToMenu()">返回大厅</button>
+                </div>
+            </div>
         </div>
 
-        <!-- 触屏按键 -->
+        <!-- 战斗触屏按键 -->
         <div id="touch-controls">
             <div class="control-side">
                 <div class="joystick">
@@ -334,7 +301,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v2.5</p>
+                <p>测试版 v3.0</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -367,27 +334,122 @@
                 <button class="btn-action" onclick="UI.startGame()">开始战斗</button>
             </div>
         </div>
+
+        <!-- 十五消消乐界面 -->
+        <div id="match3-screen">
+            <div class="m3-header">
+                <button class="m3-back" onclick="App.backToMenu()">返回大厅</button>
+                <div class="m3-score">得分: <span id="m3-score-text">0</span></div>
+            </div>
+            <div class="m3-canvas-box">
+                <canvas id="m3Canvas" width="480" height="480"></canvas>
+            </div>
+        </div>
+
+        <!-- 模态弹窗 -->
+        <div class="modal-overlay" id="modal-notice">
+            <div class="modal-box">
+                <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
+                <div class="modal-content">
+                    <h4>🎉 v3.0 核弹级更新：</h4>
+                    <p>1. **十五消消乐上线**：用 5 位主角头像玩三消！</p>
+                    <p>2. **全局音效实装**：代码实时合成电子音效，打击感爆棚！</p>
+                    <p>3. **战绩系统**：记录 P1 与 P2 的胜场，决出真正的霸主。</p>
+                    <p>4. **隐藏彩蛋**：主页“CYBER GAME STATION”藏有惊喜。</p>
+                    <p>5. **动态战斗背景**：加入了流光网格，告别死板黑屏。</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-overlay" id="modal-faq">
+            <div class="modal-box">
+                <div class="modal-header"><div class="modal-title">❓ 常见问题解答</div><button class="modal-close" onclick="closeModal('modal-faq')">×</button></div>
+                <div class="modal-content">
+                    <h4>Q1: 怎么在同一个设备上双人对战？</h4>
+                    <p>A: **电脑端**：P1 使用 W/A/S/D 移动，J 普攻，K 必杀；P2 使用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机/平板**：屏幕左右两侧会自动出现对应的虚拟按键。</p>
+                    <h4>Q2: 为什么战斗里角色变成了彩色方块？</h4>
+                    <p>A: 这通常是因为图片还在后台下载或抠图。稍等片刻即可自动恢复。如果一直不显示，请检查你上传的图片文件名是否严格为 `char1.png` ~ `char5.png`。</p>
+                    <h4>Q3: 隐藏彩蛋怎么触发？</h4>
+                    <p>A: 回到大厅，狂点标题下方的那行英文小字“CYBER GAME STATION”试试看！</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
         // ==========================================
-        // 弹窗控制逻辑
+        // Web Audio API 纯代码音效引擎
         // ==========================================
-        function openModal(id) {
-            const modal = document.getElementById(id);
-            modal.style.display = 'flex';
-            // 强制重绘以触发动画
-            void modal.offsetWidth;
-            modal.classList.add('show');
-        }
+        const AudioEngine = {
+            ctx: null,
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                }
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+            },
+            playTone(freq, type, duration, vol=0.1) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                osc.start(); osc.stop(this.ctx.currentTime + duration);
+            },
+            hit() { this.playTone(150, 'square', 0.1, 0.2); this.playTone(100, 'sawtooth', 0.15, 0.1); },
+            block() { this.playTone(400, 'sine', 0.1, 0.1); },
+            ult() { this.playTone(600, 'sawtooth', 0.3, 0.15); setTimeout(() => this.playTone(200, 'square', 0.4, 0.2), 100); },
+            click() { this.playTone(800, 'sine', 0.05, 0.05); },
+            match() { this.playTone(440, 'sine', 0.1, 0.1); setTimeout(() => this.playTone(554, 'sine', 0.1, 0.1), 50); setTimeout(() => this.playTone(659, 'sine', 0.15, 0.1), 100); }
+        };
 
-        function closeModal(id) {
-            const modal = document.getElementById(id);
-            modal.classList.remove('show');
-            setTimeout(() => {
-                modal.style.display = 'none';
-            }, 300);
-        }
+        // ==========================================
+        // 存档与战绩管理
+        // ==========================================
+        const SaveData = {
+            p1Wins: parseInt(localStorage.getItem('p1Wins') || '0'),
+            p2Wins: parseInt(localStorage.getItem('p2Wins') || '0'),
+            secretUnlocked: localStorage.getItem('secretUnlocked') === 'true',
+            
+            addWin(player) {
+                if (player === 1) this.p1Wins++; else this.p2Wins++;
+                localStorage.setItem('p1Wins', this.p1Wins);
+                localStorage.setItem('p2Wins', this.p2Wins);
+                this.updateDisplay();
+            },
+            updateDisplay() {
+                const el = document.getElementById('win-record-display');
+                if (el) el.innerText = `P1: ${this.p1Wins} 胜  |  P2: ${this.p2Wins} 胜`;
+            }
+        };
+
+        // 隐藏彩蛋逻辑
+        let secretClickCount = 0;
+        document.getElementById('secret-trigger').addEventListener('click', () => {
+            secretClickCount++;
+            AudioEngine.click();
+            if (secretClickCount >= 10 && !SaveData.secretUnlocked) {
+                SaveData.secretUnlocked = true;
+                localStorage.setItem('secretUnlocked', 'true');
+                alert('👑 彩蛋触发！真·十五 已加入选人池！');
+                // 动态将隐藏角色加入到 CHARACTERS 池中
+                CHARACTERS.push({
+                    id: 999, name: "真·十五", type: "神", color: "#ffffff", img: "logo1.jpg", img_cut: "logo1.jpg", 
+                    stats: { power: 6, speed: 6, hp: 6 }, ultName: "降维打击", 
+                    desc: "【定位】开发者神级角色。\n【被动】全属性碾压。\n【大招】降维打击：全屏秒杀。", 
+                    maxHp: 999, speed: 500, jump: -1200, atkDmg: 100, ultCost: 10
+                });
+            }
+        });
+
+        // ==========================================
+        // 弹窗与全屏控制
+        // ==========================================
+        function openModal(id) { AudioEngine.init(); AudioEngine.click(); const modal = document.getElementById(id); modal.style.display = 'flex'; void modal.offsetWidth; modal.classList.add('show'); }
+        function closeModal(id) { AudioEngine.click(); const modal = document.getElementById(id); modal.classList.remove('show'); setTimeout(() => { modal.style.display = 'none'; }, 300); }
 
         // ==========================================
         // 流程控制与动画 App
@@ -397,12 +459,14 @@
             
             init() {
                 preloadAssets();
+                SaveData.updateDisplay();
 
                 const introText = document.getElementById('intro-text');
                 const introImgs = document.getElementById('intro-imgs');
                 const skipBtn = document.getElementById('skip-btn');
 
                 skipBtn.onclick = () => {
+                    AudioEngine.init(); AudioEngine.click();
                     this.introTimers.forEach(clearTimeout);
                     this.enterMenu();
                 };
@@ -411,18 +475,13 @@
                 
                 this.introTimers.push(setTimeout(() => {
                     introText.classList.remove('show');
-                    
                     this.introTimers.push(setTimeout(() => {
                         introImgs.style.display = 'flex';
                         void introImgs.offsetWidth; 
                         introImgs.classList.add('show');
-                        
                         this.introTimers.push(setTimeout(() => {
                             introImgs.classList.remove('show');
-                            
-                            this.introTimers.push(setTimeout(() => {
-                                this.enterMenu();
-                            }, 1000));
+                            this.introTimers.push(setTimeout(() => { this.enterMenu(); }, 1000));
                         }, 4000));
                     }, 1000));
                 }, 2000));
@@ -431,7 +490,6 @@
             enterMenu() {
                 const intro = document.getElementById('intro-screen');
                 intro.classList.add('hide');
-                
                 setTimeout(() => {
                     intro.style.display = 'none';
                     const menu = document.getElementById('menu-screen');
@@ -442,84 +500,80 @@
             },
 
             openGame(gameName) {
-                if (gameName === 'fighting') {
-                    const menu = document.getElementById('menu-screen');
-                    menu.classList.remove('show');
-                    
-                    setTimeout(() => {
-                        menu.style.display = 'none';
+                AudioEngine.init(); AudioEngine.click();
+                const menu = document.getElementById('menu-screen');
+                menu.classList.remove('show');
+                
+                setTimeout(() => {
+                    menu.style.display = 'none';
+                    if (gameName === 'fighting') {
                         const select = document.getElementById('select-screen');
                         select.style.display = 'flex';
                         void select.offsetWidth;
                         select.classList.add('show');
                         UI.init();
-                    }, 500);
-                }
+                    } else if (gameName === 'match3') {
+                        const m3 = document.getElementById('match3-screen');
+                        m3.style.display = 'flex';
+                        void m3.offsetWidth;
+                        m3.classList.add('show');
+                        Match3Game.init();
+                    }
+                }, 500);
             },
 
             backToMenu() {
+                AudioEngine.click();
                 document.getElementById('battle-ui').style.display = 'none';
                 document.getElementById('touch-controls').style.display = 'none';
-                document.getElementById('select-screen').classList.remove('show');
+                document.getElementById('result-overlay').style.display = 'none';
+                
+                const select = document.getElementById('select-screen');
+                const m3 = document.getElementById('match3-screen');
+                
+                if(select) select.classList.remove('show');
+                if(m3) m3.classList.remove('show');
                 
                 setTimeout(() => {
-                    document.getElementById('select-screen').style.display = 'none';
+                    if(select) select.style.display = 'none';
+                    if(m3) m3.style.display = 'none';
                     const menu = document.getElementById('menu-screen');
                     menu.style.display = 'flex';
                     void menu.offsetWidth;
                     menu.classList.add('show');
                 }, 500);
                 Game.isRunning = false; 
+                Match3Game.isRunning = false;
+            },
+
+            toggleFullscreen() {
+                AudioEngine.init(); AudioEngine.click();
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => alert(`全屏失败: ${err.message}`));
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
             }
         };
 
         // ==========================================
-        // 游戏核心逻辑
+        // 资源加载与绿幕抠图
         // ==========================================
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-
-        const CHARACTERS = [
-            { 
-                id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", 
-                stats: { power: 5, speed: 2, hp: 4 }, ultName: "曼巴冲撞", 
-                desc: "【定位】重装战士。\n【被动】无。\n【大招】曼巴冲撞：向前发起一次霸体高速冲撞，命中后造成高额伤害并击飞对手。\n【点评】伤害极高，但移动缓慢。找准机会一击毙命。", 
-                maxHp: 400, speed: 200, jump: -800, atkDmg: 30, ultCost: 100 
-            },
-            { 
-                id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg", img_cut: "char2.png", 
-                stats: { power: 2, speed: 3, hp: 3 }, ultName: "打电动", 
-                desc: "【定位】后期法核。\n【被动】越战越勇：每经过2秒，普攻伤害永久+1。\n【大招】打电动：向前发射数据流，命中后强行束缚敌人4秒（无法行动）。\n【点评】前期唯唯诺诺，后期一发大招控住就能反杀。", 
-                maxHp: 350, speed: 300, jump: -900, atkDmg: 15, ultCost: 100 
-            },
-            { 
-                id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg", img_cut: "char3.png", 
-                stats: { power: 2, speed: 5, hp: 2 }, ultName: "大狗嚼嚼嚼", 
-                desc: "【定位】刺客。\n【被动】岁月蹉跎：每过4秒，移速下降，但攻击力提升。\n【大招】大狗嚼嚼嚼：发出恐怖咆哮，若敌人在范围内将被锁定，遭受1秒硬控和持续撕咬伤害。\n【点评】前期全场飞奔，后期伤害爆炸但跑不动。", 
-                maxHp: 300, speed: 450, jump: -1000, atkDmg: 12, ultCost: 100 
-            },
-            { 
-                id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg", img_cut: "char4.png", 
-                stats: { power: 5, speed: 4, hp: 5 }, ultName: "方天画戟", 
-                desc: "【定位】全能战神。\n【被动】杀死义父：每过10秒，全属性下降15%，跳跃变低（最低限制）。\n【大招】方天画戟：向前掷出巨大武器，命中后强制扣除敌人20%最大生命值。\n【点评】开局无敌，但必须速战速决，否则后期会变成弱鸡。", 
-                maxHp: 500, speed: 350, jump: -850, atkDmg: 40, ultCost: 100 
-            },
-            { 
-                id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", 
-                stats: { power: 1, speed: 1, hp: 1 }, ultName: "生理恐吓", 
-                desc: "【定位】终极吸血流。\n【被动】大招耗能极低（仅需40点）。\n【大招】生理恐吓：前摇极长，若未被打断，将硬控敌人1秒，并永久偷取敌人攻击力、移速和血量。\n【点评】虽然属性最差，但大招极为频繁。注意释放大招时可被打断，需找好时机。", 
-                maxHp: 250, speed: 180, jump: -700, atkDmg: 8, ultCost: 40 
-            }
-        ];
-
         const Assets = { images: {}, loaded: 0, total: 0 };
+        
+        let CHARACTERS = [
+            { id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", stats: { power: 5, speed: 2, hp: 4 }, ultName: "曼巴冲撞", desc: "【定位】重装战士。\n【大招】曼巴冲撞：高速冲撞，高额伤害击飞。", maxHp: 400, speed: 200, jump: -800, atkDmg: 30, ultCost: 100 },
+            { id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg", img_cut: "char2.png", stats: { power: 2, speed: 3, hp: 3 }, ultName: "打电动", desc: "【定位】后期法核。\n【被动】越战越勇：随时间增加攻击力。\n【大招】打电动：数据流束缚敌人4秒。", maxHp: 350, speed: 300, jump: -900, atkDmg: 15, ultCost: 100 },
+            { id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg", img_cut: "char3.png", stats: { power: 2, speed: 5, hp: 2 }, ultName: "大狗嚼嚼嚼", desc: "【定位】刺客。\n【被动】岁月蹉跎：移速下降，攻击提升。\n【大招】大狗嚼嚼嚼：范围内锁定，硬控撕咬。", maxHp: 300, speed: 450, jump: -1000, atkDmg: 12, ultCost: 100 },
+            { id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg", img_cut: "char4.png", stats: { power: 5, speed: 4, hp: 5 }, ultName: "方天画戟", desc: "【定位】全能战神。\n【被动】杀死义父：属性持续下降。\n【大招】方天画戟：丢出武器，强制扣除20%最大生命值。", maxHp: 500, speed: 350, jump: -850, atkDmg: 40, ultCost: 100 },
+            { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", stats: { power: 1, speed: 1, hp: 1 }, ultName: "生理恐吓", desc: "【定位】终极吸血流。\n【被动】大招耗能极低。\n【大招】生理恐吓：硬控1秒，偷取攻击力、移速和血量，可被打断。", maxHp: 250, speed: 180, jump: -700, atkDmg: 8, ultCost: 40 }
+        ];
         
         function chromaKeyGreenScreen(img) {
             const cvs = document.createElement('canvas');
             const MAX_WIDTH = 200;
             const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
-            cvs.width = img.naturalWidth * scale;
-            cvs.height = img.naturalHeight * scale;
+            cvs.width = img.naturalWidth * scale; cvs.height = img.naturalHeight * scale;
             const c = cvs.getContext('2d');
             c.drawImage(img, 0, 0, cvs.width, cvs.height);
             
@@ -552,6 +606,9 @@
             });
         }
 
+        // ==========================================
+        // 游戏输入控制
+        // ==========================================
         const Input = {
             keys: {},
             init() {
@@ -559,7 +616,7 @@
                 window.addEventListener('keyup', e => this.keys[e.code] = false);
                 document.querySelectorAll('[data-key]').forEach(btn => {
                     const code = btn.getAttribute('data-key');
-                    const press = (e) => { e.preventDefault(); this.keys[code] = true; };
+                    const press = (e) => { e.preventDefault(); AudioEngine.init(); this.keys[code] = true; };
                     const release = (e) => { e.preventDefault(); this.keys[code] = false; };
                     btn.addEventListener('pointerdown', press);
                     btn.addEventListener('pointerup', release);
@@ -570,6 +627,12 @@
             isDown(code) { return !!this.keys[code]; }
         };
         Input.init();
+
+        // ==========================================
+        // 十五格斗核心逻辑 (Game)
+        // ==========================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
         const STATE = { IDLE: 0, WALK: 1, JUMP: 2, BLOCK: 3, HIT: 4, ATTACK: 5, DEAD: 6, STUNNED: 7 };
 
@@ -589,9 +652,7 @@
             constructor(isP1, charId) {
                 this.isP1 = isP1; this.config = CHARACTERS.find(c => c.id === charId);
                 this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0; 
-                
                 this.width = 180; this.height = 240; this.facing = isP1 ? 1 : -1;
-                
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp; this.energy = 0; this.maxEnergy = this.config.ultCost;
                 this.state = STATE.IDLE; this.stateTimer = 0; this.hitstop = 0; this.currentAtk = this.config.atkDmg; this.currentSpeed = this.config.speed; this.currentJump = this.config.jump; 
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0; this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
@@ -616,7 +677,7 @@
             }
             handleInput() {
                 const p1 = this.isP1; const left = p1 ? Input.isDown('KeyA') : Input.isDown('ArrowLeft'); const right = p1 ? Input.isDown('KeyD') : Input.isDown('ArrowRight'); const up = p1 ? Input.isDown('KeyW') : Input.isDown('ArrowUp'); const down = p1 ? Input.isDown('KeyS') : Input.isDown('ArrowDown'); const atk = p1 ? Input.isDown('KeyJ') : Input.isDown('Numpad1'); const ult = p1 ? Input.isDown('KeyK') : Input.isDown('Numpad2');
-                if (down && this.y >= 550) { this.changeState(STATE.BLOCK); this.vx = 0; return; } if (atk) { this.startAttack(false); return; } if (ult && this.energy >= this.maxEnergy && this.state !== STATE.ATTACK) { this.energy = 0; this.startAttack(true); return; }
+                if (down && this.y >= 550) { this.changeState(STATE.BLOCK); this.vx = 0; return; } if (atk) { this.startAttack(false); return; } if (ult && this.energy >= this.maxEnergy && this.state !== STATE.ATTACK) { this.energy = 0; this.startAttack(true); AudioEngine.ult(); return; }
                 if (this.state !== STATE.JUMP) { if (up) { this.vy = this.currentJump; this.changeState(STATE.JUMP); } else if (left) { this.vx = -this.currentSpeed; this.facing = -1; this.changeState(STATE.WALK); } else if (right) { this.vx = this.currentSpeed; this.facing = 1; this.changeState(STATE.WALK); } else { this.vx = 0; this.changeState(STATE.IDLE); } }
             }
             startAttack(isUltimate) {
@@ -628,6 +689,10 @@
                         case 3: Game.triggerGlobalStun(this); this.stateTimer = 40; this.vx = 0; break;
                         case 4: Game.projectiles.push(new Projectile(this.x, this.y - 100, this.facing * 900, this, 'halberd')); this.stateTimer = 40; this.vx = 0; break;
                         case 5: this.stateTimer = 35; this.vx = 0; break;
+                        case 999: // 真·十五 全屏秒杀
+                            const target = this.isP1 ? Game.p2 : Game.p1;
+                            target.hp = 0; target.changeState(STATE.DEAD);
+                            this.stateTimer = 60; this.vx = 0; break;
                     }
                 } else { this.stateTimer = 15; this.vx = 0; }
             }
@@ -638,14 +703,14 @@
             changeState(s) { this.state = s; if (s === STATE.ATTACK) return; this.stateTimer = s === STATE.HIT ? 20 : 0; }
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height + this.yOffset, w: this.width, h: this.height }; }
             getHitbox() {
-                if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5) return null;
+                if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5 || this.config.id === 999) return null;
                 if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 200, y: this.y - 200, w: 200, h: 200 };
                 let range = this.attackData.isUlt ? 200 : 160; return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 180, w: range, h: 160 };
             }
             receiveHit(attacker, attackData, type = "normal") {
                 if (this.state === STATE.DEAD) return;
                 if (this.config.id === 5 && this.state === STATE.ATTACK && this.attackData?.isUlt && this.stateTimer > 10) { this.isUltInterrupted = true; this.changeState(STATE.HIT); this.stateTimer = 30; this.vx = attacker.facing * 400; this.hitstop = 10; attacker.hitstop = 10; this.flashTimer = 10; return; }
-                if (type === "halberd") this.hp -= this.maxHp * 0.20; else if (this.state === STATE.BLOCK) this.hp -= attackData.dmg * 0.2; else this.hp -= attackData.dmg;
+                if (type === "halberd") this.hp -= this.maxHp * 0.20; else if (this.state === STATE.BLOCK) { this.hp -= attackData.dmg * 0.2; AudioEngine.block(); } else { this.hp -= attackData.dmg; AudioEngine.hit(); }
                 this.energy = Math.min(this.maxEnergy, this.energy + 15); this.hitstop = 6; attacker.hitstop = 6; this.flashTimer = 6; 
                 if (this.hp <= 0) { this.hp = 0; this.changeState(STATE.DEAD); return; }
                 if (this.state !== STATE.BLOCK) { this.changeState(STATE.HIT); this.vx = attacker.facing * 300; }
@@ -679,7 +744,6 @@
                         drawH = hurt.h;
                         drawW = hurt.h / ratio;
                     }
-                    
                     ctx.drawImage(img, -drawW/2, -drawH, drawW, drawH); 
                     ctx.restore();
                 } else {
@@ -689,11 +753,12 @@
         }
 
         const Game = {
-            p1: null, p2: null, projectiles: [], isRunning: false, matchOver: false, shakeTimer: 0, timeLeft: 99, frameTimer: 0, 
+            p1: null, p2: null, projectiles: [], isRunning: false, matchOver: false, shakeTimer: 0, timeLeft: 99, frameTimer: 0, bgOffset: 0,
             init(c1, c2) {
                 this.p1 = new Fighter(true, c1); this.p2 = new Fighter(false, c2); this.projectiles = []; this.isRunning = true; this.matchOver = false; this.shakeTimer = 0; this.timeLeft = 99; this.frameTimer = 0;
                 document.getElementById('timer-text').innerText = this.timeLeft;
                 document.getElementById('battle-ui').style.display = 'block'; document.getElementById('touch-controls').style.display = 'flex';
+                document.getElementById('result-overlay').style.display = 'none';
                 document.getElementById('p1-hud-name').innerText = this.p1.config.name; document.getElementById('p2-hud-name').innerText = this.p2.config.name;
                 document.getElementById('p1-hud-avatar').innerHTML = `<img src="${this.p1.config.img}">`; document.getElementById('p2-hud-avatar').innerHTML = `<img src="${this.p2.config.img}">`;
             },
@@ -706,27 +771,43 @@
                 const target = caster.isP1 ? this.p2 : this.p1; if (target.state === STATE.DEAD) return;
                 target.applyStun(60); let drain = 20; target.hp = Math.max(0, target.hp - drain); caster.hp = Math.min(caster.maxHp, caster.hp + drain);
                 target.currentAtk = Math.max(1, target.currentAtk - 2); target.currentSpeed = Math.max(50, target.currentSpeed - 15);
-                caster.currentAtk += 2; caster.currentSpeed += 15; target.hitstop = 10; caster.hitstop = 10; target.flashTimer = 10; if (target.hp <= 0) { target.hp = 0; target.changeState(STATE.DEAD); }
+                caster.currentAtk += 2; caster.currentSpeed += 15; target.hitstop = 10; caster.hitstop = 10; target.flashTimer = 10; AudioEngine.ult();
+                if (target.hp <= 0) { target.hp = 0; target.changeState(STATE.DEAD); }
             },
             triggerGlobalStun(attacker) {
                 const target = attacker.isP1 ? this.p2 : this.p1;
-                if (Math.abs(attacker.x - target.x) < 300) { target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 20; target.flashTimer = 10; }
+                if (Math.abs(attacker.x - target.x) < 300) { target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 20; target.flashTimer = 10; AudioEngine.hit(); }
             },
             tick() {
                 if (!this.isRunning || this.matchOver) return;
                 if (this.shakeTimer > 0) this.shakeTimer--;
-                this.frameTimer++; if (this.frameTimer >= 60) { this.frameTimer = 0; this.timeLeft--; document.getElementById('timer-text').innerText = this.timeLeft; if (this.timeLeft <= 0) { this.matchOver = true; let winner = this.p1.hp > this.p2.hp ? "1P" : (this.p2.hp > this.p1.hp ? "2P" : "平局"); setTimeout(() => { alert(`时间到！${winner} 获胜!`); App.backToMenu(); }, 100); return; } }
+                this.frameTimer++; this.bgOffset += 0.5;
+                if (this.frameTimer >= 60) { this.frameTimer = 0; this.timeLeft--; document.getElementById('timer-text').innerText = this.timeLeft; if (this.timeLeft <= 0) { this.endGame(); return; } }
                 this.p1.update(); this.p2.update(); this.projectiles.forEach(p => p.update()); this.projectiles = this.projectiles.filter(p => p.active); Particles.update();
                 this.checkCombat(this.p1, this.p2); this.checkCombat(this.p2, this.p1);
                 this.projectiles.forEach(p => {
                     const target = p.owner === this.p1 ? this.p2 : this.p1;
                     if (this.checkAABB(p.getHurtbox(), target.getHurtbox())) {
                         p.active = false; if (p.type === 'data') { target.applyStun(120); target.hp -= 10; target.flashTimer = 10; } else if (p.type === 'halberd') target.receiveHit(p.owner, { dmg: 0 }, "halberd");
-                        Particles.spawn(p.x, p.y, '#fff', 10); this.shakeTimer = 5;
+                        Particles.spawn(p.x, p.y, '#fff', 10); this.shakeTimer = 5; AudioEngine.hit();
                     }
                 });
                 this.updateUI();
-                if (this.p1.hp <= 0 || this.p2.hp <= 0) { this.matchOver = true; setTimeout(() => { alert(`${this.p1.hp <= 0 ? '2P' : '1P'} 胜利!`); App.backToMenu(); }, 100); }
+                if (this.p1.hp <= 0 || this.p2.hp <= 0) { this.endGame(); }
+            },
+            endGame() {
+                this.matchOver = true;
+                let winner = "";
+                if (this.p1.hp <= 0) { winner = "2P 胜利!"; SaveData.addWin(2); }
+                else if (this.p2.hp <= 0) { winner = "1P 胜利!"; SaveData.addWin(1); }
+                else {
+                    if (this.p1.hp > this.p2.hp) { winner = "时间到！1P 胜利!"; SaveData.addWin(1); }
+                    else if (this.p2.hp > this.p1.hp) { winner = "时间到！2P 胜利!"; SaveData.addWin(2); }
+                    else winner = "时间到！平局!";
+                }
+                
+                document.getElementById('result-text').innerText = winner;
+                document.getElementById('result-overlay').style.display = 'flex';
             },
             checkCombat(attacker, target) {
                 const hit = attacker.getHitbox(); const hurt = target.getHurtbox();
@@ -736,8 +817,20 @@
             render() {
                 ctx.save();
                 if (this.shakeTimer > 0) { let dx = (Math.random() - 0.5) * this.shakeTimer * 2.5; let dy = (Math.random() - 0.5) * this.shakeTimer * 2.5; ctx.translate(dx, dy); }
-                let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height); bgGrad.addColorStop(0, '#1a1a2e'); bgGrad.addColorStop(1, '#0f0f1b'); ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#222'; ctx.fillRect(0, 550, canvas.width, 125); ctx.strokeStyle = '#444'; ctx.lineWidth = 2; for(let i=0; i<canvas.width; i+=100) { ctx.beginPath(); ctx.moveTo(i, 550); ctx.lineTo(i-100, 675); ctx.stroke(); }
+                
+                // 动态赛博背景
+                let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height); bgGrad.addColorStop(0, '#0f0c29'); bgGrad.addColorStop(0.5, '#302b63'); bgGrad.addColorStop(1, '#24243e'); 
+                ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // 霓虹网格线
+                ctx.strokeStyle = 'rgba(0, 255, 204, 0.1)'; ctx.lineWidth = 2;
+                for(let i=0; i<canvas.width; i+=80) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 550); ctx.stroke(); }
+                let offsetY = this.bgOffset % 80;
+                for(let j=0; j<550; j+=80) { ctx.beginPath(); ctx.moveTo(0, j + offsetY); ctx.lineTo(canvas.width, j + offsetY); ctx.stroke(); }
+
+                ctx.fillStyle = '#111'; ctx.fillRect(0, 550, canvas.width, 125); 
+                ctx.strokeStyle = '#444'; ctx.lineWidth = 2; for(let i=0; i<canvas.width; i+=100) { ctx.beginPath(); ctx.moveTo(i, 550); ctx.lineTo(i-100, 675); ctx.stroke(); }
+                
                 if (this.isRunning) {
                     this.p1.render(); this.p2.render();
                     this.projectiles.forEach(p => { ctx.save(); ctx.translate(p.x, p.y); if(p.type === 'halberd') ctx.rotate(p.angle); ctx.fillStyle = p.type === 'data' ? '#00ffff' : '#ffaa00'; ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle; const h = p.getHurtbox(); ctx.fillRect(-h.w/2, -h.h/2, h.w, h.h); ctx.restore(); });
@@ -749,8 +842,17 @@
 
         const UI = {
             p1Index: 0, p2Index: 4,
-            init() { this.updateShowcases(); },
-            changeChar(player, dir) { if (player === 1) this.p1Index = (this.p1Index + dir + CHARACTERS.length) % CHARACTERS.length; else this.p2Index = (this.p2Index + dir + CHARACTERS.length) % CHARACTERS.length; this.updateShowcases(); },
+            init() { 
+                if (this.p1Index >= CHARACTERS.length) this.p1Index = 0;
+                if (this.p2Index >= CHARACTERS.length) this.p2Index = 0;
+                this.updateShowcases(); 
+            },
+            changeChar(player, dir) { 
+                AudioEngine.click();
+                if (player === 1) this.p1Index = (this.p1Index + dir + CHARACTERS.length) % CHARACTERS.length; 
+                else this.p2Index = (this.p2Index + dir + CHARACTERS.length) % CHARACTERS.length; 
+                this.updateShowcases(); 
+            },
             updateShowcases() {
                 const c1 = CHARACTERS[this.p1Index];
                 document.getElementById('p1-name-badge').innerText = c1.name; document.getElementById('p1-name-badge').style.background = c1.color;
@@ -774,24 +876,312 @@
                 return html;
             },
             startGame() {
+                AudioEngine.click();
                 document.getElementById('select-screen').classList.remove('show');
                 setTimeout(() => {
                     document.getElementById('select-screen').style.display = 'none';
                     Game.init(CHARACTERS[this.p1Index].id, CHARACTERS[this.p2Index].id);
                 }, 500);
+            },
+            restartGame() {
+                AudioEngine.click();
+                Game.init(CHARACTERS[this.p1Index].id, CHARACTERS[this.p2Index].id);
             }
         };
 
+        // ==========================================
+        // 十五消消乐核心逻辑 (Match3Game)
+        // ==========================================
+        const Match3Game = {
+            isRunning: false,
+            canvas: null, ctx: null,
+            size: 8, tileSize: 60,
+            grid: [],
+            selected: null,
+            score: 0,
+            animState: 'IDLE', // IDLE, SWAPPING, CLEARING, FALLING
+            animTimer: 0,
+            animData: null,
+
+            init() {
+                this.canvas = document.getElementById('m3Canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.score = 0;
+                document.getElementById('m3-score-text').innerText = this.score;
+                this.isRunning = true;
+                this.generateGrid();
+                
+                // 绑定点击事件
+                this.canvas.addEventListener('pointerdown', (e) => this.handleClick(e));
+            },
+
+            generateGrid() {
+                this.grid = [];
+                for (let r = 0; r < this.size; r++) {
+                    let row = [];
+                    for (let c = 0; c < this.size; c++) {
+                        let charId;
+                        do {
+                            charId = Math.floor(Math.random() * 5) + 1; // 1-5
+                        } while (
+                            (c >= 2 && row[c-1] === charId && row[c-2] === charId) || // 横向三连
+                            (r >= 2 && this.grid[r-1][c] === charId && this.grid[r-2][c] === charId) // 纵向三连
+                        );
+                        row.push(charId);
+                    }
+                    this.grid.push(row);
+                }
+            },
+
+            handleClick(e) {
+                if (!this.isRunning || this.animState !== 'IDLE') return;
+                const rect = this.canvas.getBoundingClientRect();
+                // 坐标映射，处理 CSS 缩放
+                const scaleX = this.canvas.width / rect.width;
+                const scaleY = this.canvas.height / rect.height;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                
+                const c = Math.floor(x / this.tileSize);
+                const r = Math.floor(y / this.tileSize);
+                if (r < 0 || r >= this.size || c < 0 || c >= this.size) return;
+
+                AudioEngine.click();
+
+                if (!this.selected) {
+                    this.selected = { r, c };
+                } else {
+                    const prev = this.selected;
+                    // 如果点的是自己，取消选中
+                    if (prev.r === r && prev.c === c) {
+                        this.selected = null;
+                    } 
+                    // 如果相邻，尝试交换
+                    else if (Math.abs(prev.r - r) + Math.abs(prev.c - c) === 1) {
+                        this.swap(prev, { r, c });
+                        this.selected = null;
+                    } 
+                    // 如果不相邻，选中新的
+                    else {
+                        this.selected = { r, c };
+                    }
+                }
+            },
+
+            swap(p1, p2) {
+                this.animState = 'SWAPPING';
+                this.animTimer = 10; // 延迟动画
+                this.animData = { p1, p2 };
+                // 数据层面先交换
+                let temp = this.grid[p1.r][p1.c];
+                this.grid[p1.r][p1.c] = this.grid[p2.r][p2.c];
+                this.grid[p2.r][p2.c] = temp;
+            },
+
+            checkMatches() {
+                let toClear = new Set();
+                // 横向检测
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size - 2; c++) {
+                        let val = this.grid[r][c];
+                        if (val === 0) continue;
+                        if (val === this.grid[r][c+1] && val === this.grid[r][c+2]) {
+                            toClear.add(`${r},${c}`); toClear.add(`${r},${c+1}`); toClear.add(`${r},${c+2}`);
+                        }
+                    }
+                }
+                // 纵向检测
+                for (let c = 0; c < this.size; c++) {
+                    for (let r = 0; r < this.size - 2; r++) {
+                        let val = this.grid[r][c];
+                        if (val === 0) continue;
+                        if (val === this.grid[r+1][c] && val === this.grid[r+2][c]) {
+                            toClear.add(`${r},${c}`); toClear.add(`${r+1},${c}`); toClear.add(`${r+2},${c}`);
+                        }
+                    }
+                }
+                return toClear;
+            },
+
+            processClear(matches) {
+                if (matches.size === 0) {
+                    this.animState = 'IDLE';
+                    this.checkDeadlock(); // 检查死局
+                    return;
+                }
+                
+                AudioEngine.match();
+                this.score += matches.size * 10;
+                document.getElementById('m3-score-text').innerText = this.score;
+
+                matches.forEach(pos => {
+                    let [r, c] = pos.split(',').map(Number);
+                    this.grid[r][c] = 0; // 标记为空
+                });
+                
+                this.animState = 'CLEARING';
+                this.animTimer = 15; // 消除停顿
+            },
+
+            applyGravity() {
+                for (let c = 0; c < this.size; c++) {
+                    let emptySpace = 0;
+                    for (let r = this.size - 1; r >= 0; r--) {
+                        if (this.grid[r][c] === 0) {
+                            emptySpace++;
+                        } else if (emptySpace > 0) {
+                            // 下落
+                            this.grid[r + emptySpace][c] = this.grid[r][c];
+                            this.grid[r][c] = 0;
+                        }
+                    }
+                    // 顶部填充新方块
+                    for (let r = 0; r < emptySpace; r++) {
+                        this.grid[r][c] = Math.floor(Math.random() * 5) + 1;
+                    }
+                }
+                this.animState = 'FALLING';
+                this.animTimer = 15;
+            },
+
+            checkDeadlock() {
+                // 简单检测：遍历所有格子，尝试虚拟交换，看是否能消除
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        // 尝试向右换
+                        if (c < this.size - 1) {
+                            this.doVirtualSwap(r, c, r, c + 1);
+                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r, c + 1); return; }
+                            this.doVirtualSwap(r, c, r, c + 1);
+                        }
+                        // 尝试向下换
+                        if (r < this.size - 1) {
+                            this.doVirtualSwap(r, c, r + 1, c);
+                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r + 1, c); return; }
+                            this.doVirtualSwap(r, c, r + 1, c);
+                        }
+                    }
+                }
+                // 死局，洗牌
+                console.log("死局，洗牌");
+                this.generateGrid();
+            },
+
+            doVirtualSwap(r1, c1, r2, c2) {
+                let temp = this.grid[r1][c1];
+                this.grid[r1][c1] = this.grid[r2][c2];
+                this.grid[r2][c2] = temp;
+            },
+
+            update() {
+                if (!this.isRunning) return;
+                if (this.animTimer > 0) {
+                    this.animTimer--;
+                    if (this.animTimer === 0) {
+                        if (this.animState === 'SWAPPING') {
+                            const matches = this.checkMatches();
+                            if (matches.size > 0) {
+                                this.processClear(matches);
+                            } else {
+                                // 换回来
+                                this.doVirtualSwap(this.animData.p1.r, this.animData.p1.c, this.animData.p2.r, this.animData.p2.c);
+                                this.animState = 'IDLE';
+                                AudioEngine.block(); // 错误音效
+                            }
+                        } else if (this.animState === 'CLEARING') {
+                            this.applyGravity();
+                        } else if (this.animState === 'FALLING') {
+                            this.animState = 'IDLE';
+                            const matches = this.checkMatches();
+                            if (matches.size > 0) {
+                                this.processClear(matches);
+                            } else {
+                                this.checkDeadlock();
+                            }
+                        }
+                    }
+                }
+            },
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        let val = this.grid[r][c];
+                        let x = c * this.tileSize;
+                        let y = r * this.tileSize;
+                        
+                        if (val === 0) continue; // 空位
+
+                        // 绘制方块 (用人物头像)
+                        let char = CHARACTERS.find(ch => ch.id === val);
+                        let img = Assets.images[char.img];
+                        
+                        // 绘制底框
+                        this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                        this.ctx.fillRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+
+                        // 绘制头像
+                        if (img && img.complete) {
+                            this.ctx.save();
+                            this.ctx.beginPath();
+                            this.ctx.roundRect(x + 5, y + 5, this.tileSize - 10, this.tileSize - 10, 8);
+                            this.ctx.clip();
+                            this.ctx.drawImage(img, x + 5, y + 5, this.tileSize - 10, this.tileSize - 10);
+                            this.ctx.restore();
+                        } else {
+                            // 兜底色块
+                            this.ctx.fillStyle = char.color;
+                            this.ctx.fillRect(x + 5, y + 5, this.tileSize - 10, this.tileSize - 10);
+                        }
+
+                        // 选中高亮
+                        if (this.selected && this.selected.r === r && this.selected.c === c) {
+                            this.ctx.strokeStyle = '#00ffcc';
+                            this.ctx.lineWidth = 4;
+                            this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                        }
+                    }
+                }
+            }
+        };
+
+        // 兼容 roundRect
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
+                this.beginPath(); this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r); this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r); this.arcTo(x, y, x + w, y, r);
+                this.closePath(); return this;
+            };
+        }
+
+        // ==========================================
+        // 全局主循环
+        // ==========================================
         let acc = 0, lastTime = performance.now();
         function loop(time) {
             const dt = (time - lastTime) / 1000; lastTime = time;
-            if (Game.isRunning && !Game.matchOver) { acc += dt; while (acc >= 1/60) { Game.tick(); acc -= 1/60; } }
+            
+            if (Game.isRunning && !Game.matchOver) { 
+                acc += dt; 
+                while (acc >= 1/60) { Game.tick(); acc -= 1/60; } 
+            }
             Game.render();
+
+            if (Match3Game.isRunning) {
+                Match3Game.update();
+                Match3Game.render();
+            }
+            
             requestAnimationFrame(loop);
         }
 
+        // 统一启动
         App.init();
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                    </html>
