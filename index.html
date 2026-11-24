@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.2</title>
+    <title>十五网页游戏大厅 - v3.3</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -11,18 +11,37 @@
         #game-container { position: relative; width: 100%; max-width: 1200px; height: 100vh; max-height: 800px; aspect-ratio: 16/9; overflow: hidden; background: #000; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
         canvas { width: 100%; height: 100%; display: block; }
 
-        /* ==================== 1. 开场动画 CSS ==================== */
+        /* ==================== 1. 开场动画 CSS (纯CSS动画，绝对不卡) ==================== */
         #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
         #intro-screen.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
         @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
-        .fade-text { font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; transform: scale(0.9); position: absolute; }
-        .fade-text.show { opacity: 1; transform: scale(1); }
-        .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; width: 100%; height: 100%; padding: 20px; transform: translateY(20px); }
-        .intro-img-group.show { opacity: 1; transform: translateY(0); }
+
+        /* 文字纯CSS动画 */
+        .fade-text { position: absolute; font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; opacity: 0; }
+        .fade-text.animating { animation: textAnim 4s ease-in-out forwards; }
+        @keyframes textAnim {
+            0% { opacity: 0; transform: scale(0.8); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.1); }
+        }
+        
+        /* Logo纯CSS动画 */
+        .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; width: 100%; height: 100%; padding: 20px; }
+        .intro-img-group.animating { animation: imgAnim 6s ease-in-out forwards; }
+        @keyframes imgAnim {
+            0% { opacity: 0; transform: translateY(20px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-20px); }
+        }
+        
         .intro-img-group img { max-width: 80%; max-height: 35vh; margin-bottom: 10px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite; }
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
+        
         .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; z-index: 210; transition: 0.3s; backdrop-filter: blur(5px); }
         .skip-btn:hover { background: rgba(255,255,255,0.3); }
 
@@ -175,7 +194,6 @@
         .m3-canvas-box { background: rgba(0,0,0,0.6); border: 3px solid #00ffcc; border-radius: 15px; padding: 5px; box-shadow: 0 0 30px rgba(0,255,204,0.3); position: relative; }
         #m3Canvas { width: 90vw; max-width: 460px; aspect-ratio: 1/1; display: block; touch-action: none; }
         
-        /* Combo 飘字 */
         .combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0.5); font-size: 60px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; }
         .combo-text.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
@@ -356,10 +374,10 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 十五游戏大厅 v3.2 更新：</h4>
-                    <p>1. **消消乐史诗级重做**：现在支持丝滑的“滑动操作”，掉落和消除动画全面升级，加入了连击飘字和动感音效！</p>
-                    <p>2. **防死局系统**：消消乐如果没有可消除的方块，会自动洗牌。</p>
-                    <p>3. **新手引导优化**：在消消乐上方加了醒目的提示。</p>
+                    <h4>🎉 十五游戏大厅 v3.3 更新：</h4>
+                    <p>1. **修复了开头文字不见的问题**：现在使用纯 CSS 动画，文字和鲸鱼 Logo 丝滑呈现。</p>
+                    <p>2. **修复了图片加载卡顿**：网页现在**瞬间开启**，不用死等图片下载，图片会在后台自动加载，完全不影响你游玩！</p>
+                    <p>3. **消消乐丝滑滑动**：依然保留了最爽的滑动消除手感。</p>
                 </div>
             </div>
         </div>
@@ -371,7 +389,7 @@
                     <p>A: 在新版本中，您只需要**按住一个头像，然后向上、下、左、右滑动**，它就会和旁边的头像换位置啦！只要三个相同的头像连成横排或竖排，就能“嘭”地一下消除掉！</p>
                     
                     <h4>Q2: 为什么格斗游戏里的人物像个方块？</h4>
-                    <p>A: 那是人物照片还在后台处理。因为要把绿幕背景抠掉需要一点时间。你稍微等一下，或者多滑两下屏幕，图像马上就会“变”出来。</p>
+                    <p>A: 网页打开是秒进的，由于您的原图可能比较大，图片需要一点点时间在后台下载和抠图。稍等几秒钟，图像马上就会“变”出来。</p>
                     
                     <h4>Q3: 怎么和朋友在同一个手机上打格斗？</h4>
                     <p>A: **电脑端**：P1 用 W/A/S/D 移动，J 普攻，K 必杀；P2 用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机端**：屏幕左右两侧会各出现一套虚拟摇杆和按键，一人控制一边！</p>
@@ -460,42 +478,43 @@
         function closeModal(id) { AudioEngine.click(); const modal = document.getElementById(id); modal.classList.remove('show'); setTimeout(() => { modal.style.display = 'none'; }, 300); }
 
         // ==========================================
-        // 流程控制与动画 App
+        // 流程控制与开场动画 App
         // ==========================================
         const App = {
             introTimers: [],
             
             init() {
-                preloadAssets();
+                // 图片在后端慢慢加载，绝不阻塞页面
+                setTimeout(preloadAssets, 100);
                 SaveData.updateDisplay();
 
                 const introText = document.getElementById('intro-text');
                 const introImgs = document.getElementById('intro-imgs');
                 const skipBtn = document.getElementById('skip-btn');
 
+                // 纯 CSS 动画控制
+                introText.classList.add('animating');
+                
+                // 3.5秒后文字消失，图片出现
+                this.introTimers.push(setTimeout(() => {
+                    introImgs.style.display = 'flex';
+                    introImgs.classList.add('animating');
+                }, 3500));
+
+                // 9秒后自动进入主菜单（或者用户点击跳过）
+                this.introTimers.push(setTimeout(() => {
+                    this.enterMenu();
+                }, 9000));
+
                 skipBtn.onclick = () => {
                     AudioEngine.init(); AudioEngine.click();
                     this.introTimers.forEach(clearTimeout);
                     this.enterMenu();
                 };
-
-                introText.classList.add('show');
-                
-                this.introTimers.push(setTimeout(() => {
-                    introText.classList.remove('show');
-                    this.introTimers.push(setTimeout(() => {
-                        introImgs.style.display = 'flex';
-                        void introImgs.offsetWidth; 
-                        introImgs.classList.add('show');
-                        this.introTimers.push(setTimeout(() => {
-                            introImgs.classList.remove('show');
-                            this.introTimers.push(setTimeout(() => { this.enterMenu(); }, 1000));
-                        }, 4000));
-                    }, 1000));
-                }, 2000));
             },
 
             enterMenu() {
+                this.introTimers.forEach(clearTimeout); // 清除剩余计时器防止冲突
                 const intro = document.getElementById('intro-screen');
                 intro.classList.add('hide');
                 setTimeout(() => {
@@ -565,7 +584,7 @@
         };
 
         // ==========================================
-        // 资源加载与绿幕抠图
+        // 资源加载与绿幕抠图 (极速防卡死版)
         // ==========================================
         const Assets = { images: {}, loaded: 0, total: 0 };
         
@@ -578,39 +597,50 @@
         ];
         
         function chromaKeyGreenScreen(img) {
-            const cvs = document.createElement('canvas');
-            const MAX_WIDTH = 200;
-            const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
-            cvs.width = img.naturalWidth * scale; cvs.height = img.naturalHeight * scale;
-            const c = cvs.getContext('2d');
-            c.drawImage(img, 0, 0, cvs.width, cvs.height);
-            
-            const imgData = c.getImageData(0, 0, cvs.width, cvs.height);
-            const data = imgData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i], g = data[i+1], b = data[i+2];
-                if (g > r * 1.15 && g > b * 1.15 && g > 40) { data[i+3] = 0; }
-                else if (g > r * 1.05 && g > b * 1.05) { data[i+3] = 128; }
+            try {
+                const cvs = document.createElement('canvas');
+                const MAX_WIDTH = 200; // 降采样
+                const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
+                cvs.width = img.naturalWidth * scale; 
+                cvs.height = img.naturalHeight * scale;
+                const c = cvs.getContext('2d');
+                c.drawImage(img, 0, 0, cvs.width, cvs.height);
+                
+                const imgData = c.getImageData(0, 0, cvs.width, cvs.height);
+                const data = imgData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i], g = data[i+1], b = data[i+2];
+                    // 绿幕特征抠图
+                    if (g > r * 1.15 && g > b * 1.15 && g > 40) { data[i+3] = 0; }
+                    else if (g > r * 1.05 && g > b * 1.05) { data[i+3] = 128; }
+                }
+                c.putImageData(imgData, 0, 0);
+                return cvs; 
+            } catch (e) {
+                console.warn("抠图失败，可能由于跨域限制，转为普通图片", e);
+                return img;
             }
-            c.putImageData(imgData, 0, 0);
-            return cvs; 
         }
 
         function preloadAssets() {
             let urls = [];
             CHARACTERS.forEach(c => { urls.push(c.img); urls.push(c.img_cut); });
             Assets.total = urls.length;
+            
             urls.forEach(url => {
                 let img = new Image();
                 img.src = url;
                 img.onload = () => {
-                    setTimeout(() => {
-                        if (url.endsWith('.png')) Assets.images[url] = chromaKeyGreenScreen(img);
-                        else Assets.images[url] = img;
-                        Assets.loaded++;
-                    }, 0);
+                    // 使用 requestIdleCallback 或 setTimeout 保证在浏览器空闲时处理
+                    (window.requestIdleCallback || setTimeout)(() => {
+                        if (url.endsWith('.png')) {
+                            Assets.images[url] = chromaKeyGreenScreen(img);
+                        } else {
+                            Assets.images[url] = img;
+                        }
+                    });
                 };
-                img.onerror = () => { Assets.loaded++; };
+                img.onerror = () => {};
             });
         }
 
@@ -892,7 +922,7 @@
         };
 
         // ==========================================
-        // 欢乐消消乐核心逻辑 (Match3Game 重构版)
+        // 欢乐消消乐核心逻辑 (Match3Game)
         // ==========================================
         const Match3Game = {
             isRunning: false,
@@ -900,15 +930,14 @@
             size: 8, tileSize: 55, padding: 5,
             grid: [],
             score: 0,
-            state: 'IDLE', // IDLE, SWAPPING, CLEARING, FALLING
+            state: 'IDLE', 
             animTimer: 0,
             animData: null,
             combo: 0,
-            particles: [], // 消除时的粒子特效
+            particles: [], 
             
-            // 交互记录
             pointerStart: { x: 0, y: 0 },
-            activeTile: null, // 当前按下的方块
+            activeTile: null, 
 
             init() {
                 this.canvas = document.getElementById('m3Canvas');
@@ -924,7 +953,6 @@
                 
                 this.generateGrid();
                 
-                // 绑定滑动事件
                 this.canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
                 this.canvas.addEventListener('pointerup', (e) => this.onPointerUp(e));
                 this.canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
@@ -957,7 +985,7 @@
                     targetY: r * this.tileSize,
                     scale: 1,
                     alpha: 1,
-                    vy: 0 // 下落速度
+                    vy: 0 
                 };
             },
 
@@ -983,26 +1011,23 @@
             onPointerMove(e) {
                 if (!this.isRunning || this.state !== 'IDLE' || !this.activeTile) return;
                 
-                // 计算滑动距离
                 let dx = e.clientX - this.pointerStart.x;
                 let dy = e.clientY - this.pointerStart.y;
-                let threshold = 20; // 滑动阈值
+                let threshold = 20; 
 
                 if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
                     let targetR = this.activeTile.r;
                     let targetC = this.activeTile.c;
 
-                    // 判断方向
                     if (Math.abs(dx) > Math.abs(dy)) {
-                        targetC += dx > 0 ? 1 : -1; // 右滑或左滑
+                        targetC += dx > 0 ? 1 : -1; 
                     } else {
-                        targetR += dy > 0 ? 1 : -1; // 下滑或上滑
+                        targetR += dy > 0 ? 1 : -1; 
                     }
 
-                    // 边界检测
                     if (targetR >= 0 && targetR < this.size && targetC >= 0 && targetC < this.size) {
                         this.swapTiles({r: this.activeTile.r, c: this.activeTile.c}, {r: targetR, c: targetC});
-                        this.activeTile = null; // 消耗掉
+                        this.activeTile = null; 
                     }
                 }
             },
@@ -1025,7 +1050,7 @@
                 t2.targetX = p1.c * this.tileSize; t2.targetY = p1.r * this.tileSize;
 
                 this.animData = { p1, p2, t1, t2 };
-                this.animTimer = 10; // 交换缓冲时间
+                this.animTimer = 10; 
             },
 
             checkMatches() {
@@ -1070,7 +1095,6 @@
                     let tile = this.grid[r][c];
                     tile.state = 'CLEARING';
                     
-                    // 生成粒子
                     for(let i=0; i<5; i++) {
                         this.particles.push({
                             x: tile.x + this.tileSize/2,
@@ -1094,47 +1118,38 @@
                         if (this.grid[r][c].id === 0) {
                             emptySpace++;
                         } else if (emptySpace > 0) {
-                            // 下落
                             this.grid[r + emptySpace][c] = this.grid[r][c];
                             this.grid[r][c] = this.createTile(0, r, c);
                             this.grid[r + emptySpace][c].targetY = (r + emptySpace) * this.tileSize;
                         }
                     }
-                    // 顶部填充
                     for (let r = 0; r < emptySpace; r++) {
                         let newId = Math.floor(Math.random() * 5) + 1;
                         let newTile = this.createTile(newId, r, c);
-                        // 从屏幕上方掉落
                         newTile.y = -1 * this.tileSize * (emptySpace - r); 
                         this.grid[r][c] = newTile;
                     }
                 }
                 this.state = 'FALLING';
-                this.animTimer = 25; // 掉落缓冲时间
+                this.animTimer = 25; 
             },
 
             update() {
                 if (!this.isRunning) return;
 
-                // 1. 物理动画更新
-                let isAnimating = false;
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         let tile = this.grid[r][c];
                         if (!tile || tile.id === 0) continue;
                         
                         if (this.state === 'FALLING') {
-                            // 重力下落
-                            tile.vy += 2; // 重力加速度
+                            tile.vy += 2; 
                             tile.y += tile.vy;
                             if (tile.y >= tile.targetY) {
                                 tile.y = tile.targetY;
                                 tile.vy = 0;
-                            } else {
-                                isAnimating = true;
                             }
                         } else {
-                            // 缓动移动（用于交换）
                             if (Math.abs(tile.x - tile.targetX) > 1 || Math.abs(tile.y - tile.targetY) > 1) {
                                 tile.x += (tile.targetX - tile.x) * 0.4;
                                 tile.y += (tile.targetY - tile.y) * 0.4;
@@ -1145,16 +1160,14 @@
                     }
                 }
 
-                // 2. 粒子动画
                 for(let i = this.particles.length - 1; i>=0; i--) {
                     let p = this.particles[i];
                     p.x += p.vx; p.y += p.vy;
-                    p.vy += 0.2; // 粒子重力
+                    p.vy += 0.2; 
                     p.life -= 0.05;
                     if(p.life <= 0) this.particles.splice(i, 1);
                 }
 
-                // 3. 状态流转
                 if (this.animTimer > 0) {
                     this.animTimer--;
                     if (this.animTimer === 0) {
@@ -1164,7 +1177,6 @@
                                 this.combo = 0;
                                 this.processClear(matches);
                             } else {
-                                // 无效交换，换回去
                                 let {p1, p2, t1, t2} = this.animData;
                                 this.grid[p1.r][p1.c] = t1; this.grid[p2.r][p2.c] = t2;
                                 t1.targetX = p1.c * this.tileSize; t1.targetY = p1.r * this.tileSize;
@@ -1202,7 +1214,6 @@
                         }
                     }
                 }
-                // 没死局就洗牌
                 this.generateGrid();
             },
 
@@ -1226,30 +1237,26 @@
                         
                         this.ctx.save();
                         
-                        // 动画缩放
                         let renderScale = 1;
                         let renderAlpha = 1;
                         
                         if (this.state === 'CLEARING' && this.animTimer > 5) {
-                            // 消除时放大并淡出
                             renderScale = 1 + (15 - this.animTimer) * 0.1;
                             renderAlpha = this.animTimer / 15;
                         }
                         if (this.activeTile && this.activeTile.r === r && this.activeTile.c === c) {
-                            renderScale = 1.1; // 选中放大
+                            renderScale = 1.1;
                         }
 
                         this.ctx.translate(tile.x + ts/2, tile.y + ts/2);
                         this.ctx.scale(renderScale, renderScale);
                         this.ctx.globalAlpha = renderAlpha;
 
-                        // 阴影/底框
                         this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
                         this.ctx.beginPath();
                         this.ctx.roundRect(-ts/2 + 2, -ts/2 + 2, ts - 4, ts - 4, 8);
                         this.ctx.fill();
 
-                        // 绘制头像
                         if (img && img.complete) {
                             this.ctx.save();
                             this.ctx.beginPath();
@@ -1269,7 +1276,6 @@
                     }
                 }
 
-                // 绘制粒子特效
                 this.particles.forEach(p => {
                     this.ctx.fillStyle = p.color;
                     this.ctx.globalAlpha = p.life;
@@ -1281,7 +1287,6 @@
             }
         };
 
-        // 兼容 roundRect
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
                 if (w < 2 * r) r = w / 2; if (h < 2 * r) r = h / 2;
@@ -1292,9 +1297,6 @@
             };
         }
 
-        // ==========================================
-        // 全局主循环
-        // ==========================================
         let acc = 0, lastTime = performance.now();
         function loop(time) {
             const dt = (time - lastTime) / 1000; lastTime = time;
@@ -1317,4 +1319,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                        </html>
+    </html>
