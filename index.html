@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v2.3</title>
+    <title>十五网页游戏大厅 - v2.4</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -39,6 +39,11 @@
         /* 赛博网格背景 */
         .menu-bg-grid { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background-image: linear-gradient(rgba(0, 255, 204, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 204, 0.2) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg); transform-origin: bottom; animation: gridMove 3s linear infinite; z-index: 1; }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
+
+        /* 跑马灯公告栏 */
+        .announcement-bar { position: absolute; top: 20px; width: 90%; max-width: 800px; background: rgba(0, 0, 0, 0.6); border: 1px solid #00ffcc; border-radius: 20px; overflow: hidden; white-space: nowrap; padding: 10px 0; box-shadow: 0 0 10px rgba(0,255,204,0.3); z-index: 10; }
+        .announcement-bar span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; color: #fff; font-size: 15px; font-weight: bold; letter-spacing: 1px; }
+        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         .menu-title { position: relative; z-index: 2; font-size: 5vw; font-weight: bold; color: #fff; margin-bottom: 10px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
         .menu-subtitle { position: relative; z-index: 2; font-size: 1.5vw; color: #00ffcc; margin-bottom: 50px; letter-spacing: 4px; }
@@ -94,7 +99,7 @@
         .stat-seg.active.hp { background: #00ff00; }
 
         .char-ult { color: #ffd700; font-weight: bold; margin-top: 8px; font-size: 14px; text-shadow: 1px 1px 0 #000; }
-        .char-desc { font-size: 12px; color: #ddd; text-align: left; margin-top: 5px; line-height: 1.4; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; width: 100%; height: 80px; overflow-y: auto; }
+        .char-desc { font-size: 12px; color: #ddd; text-align: left; margin-top: 5px; line-height: 1.4; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 8px; width: 100%; height: 85px; overflow-y: auto; }
 
         .select-footer { padding: 10px; text-align: center; display: flex; justify-content: center; gap: 20px; }
         .btn-action { background: #ffd700; color: #000; font-size: 20px; font-weight: bold; padding: 8px 40px; border-radius: 25px; border: none; cursor: pointer; box-shadow: 0 4px 0 #b38f00; transition: 0.1s; }
@@ -122,12 +127,13 @@
         .center-hud { display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .timer-box { background: #ffd700; color: #000; font-size: 30px; font-weight: bold; width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid #fff; margin-top: 5px; }
         
-        /* 战斗中的退出键 */
         .btn-quit { pointer-events: auto; background: rgba(255, 50, 50, 0.8); color: white; border: 2px solid white; padding: 5px 15px; border-radius: 15px; font-size: 14px; cursor: pointer; transition: 0.2s; font-weight: bold; }
         .btn-quit:hover { background: red; transform: scale(1.05); }
 
+        /* 触屏控制器（完美镜像版） */
         #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; justify-content: space-between; align-items: flex-end; padding: 20px; }
         .control-side { display: flex; align-items: flex-end; gap: 20px; pointer-events: auto; }
+        
         .joystick { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); position: relative; }
         .joy-btn { position: absolute; width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 18px; }
         .joy-btn:active { background: rgba(255,255,255,0.6); }
@@ -135,12 +141,20 @@
         .joy-down { bottom: 0; left: 40px; height: 35px; border-radius: 0 0 8px 8px; }
         .joy-left { top: 40px; left: 0; width: 35px; border-radius: 8px 0 0 8px; }
         .joy-right { top: 40px; right: 0; width: 35px; border-radius: 0 8px 8px 0; }
+
         .action-btns { display: grid; grid-template-columns: 60px 60px; grid-template-rows: 60px 60px; gap: 8px; }
         .act-btn { border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: bold; color: #fff; border: 2px solid rgba(255,255,255,0.5); }
         .act-btn:active { transform: scale(0.95); }
-        .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; }
-        .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; }
-        .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; }
+        
+        /* P1 的按键排布 */
+        .control-side:first-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; } /* 防 在左上 */
+        .control-side:first-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; } /* 必杀 在右上 */
+        .control-side:first-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; } /* 拍 在右下 */
+
+        /* P2 的按键排布（完美镜像） */
+        .control-side:last-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 2; } /* 防 在右上 */
+        .control-side:last-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 1; color: #000; } /* 必杀 在左上 */
+        .control-side:last-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 1; } /* 拍 在左下 */
     </style>
 </head>
 <body>
@@ -161,6 +175,12 @@
         <!-- 大厅主界面 -->
         <div id="menu-screen">
             <div class="menu-bg-grid"></div>
+            
+            <!-- 公告栏 -->
+            <div class="announcement-bar">
+                <span>🎉 十五网页游戏 v2.4 震撼更新：1. 修复按键不镜像问题，操作更顺手！2. 优化加载速度，秒开不卡顿。3. 战斗新增【退出】按钮。4. 角色体型大放送，打斗更带感！5. 角色技能介绍全面扩写。6. 主页新增豪华赛博特效！</span>
+            </div>
+
             <div class="menu-title">十五游戏大厅</div>
             <div class="menu-subtitle">CYBER GAME STATION</div>
             
@@ -248,7 +268,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v2.3</p>
+                <p>测试版 v2.4</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -291,7 +311,6 @@
             introTimers: [],
             
             init() {
-                // 开启后台静默加载，不阻塞任何界面显示
                 preloadAssets();
 
                 const introText = document.getElementById('intro-text');
@@ -334,7 +353,7 @@
                     menu.style.display = 'flex';
                     void menu.offsetWidth;
                     menu.classList.add('show');
-                }, 1000); // 等动画播完
+                }, 1000);
             },
 
             openGame(gameName) {
@@ -375,9 +394,6 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // ==========================================
-        // 角色介绍详细扩写版！
-        // ==========================================
         const CHARACTERS = [
             { 
                 id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", 
@@ -413,7 +429,6 @@
 
         const Assets = { images: {}, loaded: 0, total: 0 };
         
-        // 🚀 极速异步抠图（限宽200px，彻底摆脱卡顿）
         function chromaKeyGreenScreen(img) {
             const cvs = document.createElement('canvas');
             const MAX_WIDTH = 200;
@@ -442,7 +457,6 @@
                 let img = new Image();
                 img.src = url;
                 img.onload = () => {
-                    // 使用 setTimeout 在后台微任务中处理，防止阻塞动画
                     setTimeout(() => {
                         if (url.endsWith('.png')) Assets.images[url] = chromaKeyGreenScreen(img);
                         else Assets.images[url] = img;
@@ -491,7 +505,6 @@
                 this.isP1 = isP1; this.config = CHARACTERS.find(c => c.id === charId);
                 this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0; 
                 
-                // 🚀 人物大幅放大！从 120 变 180
                 this.width = 180; this.height = 240; this.facing = isP1 ? 1 : -1;
                 
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp; this.energy = 0; this.maxEnergy = this.config.ultCost;
@@ -541,7 +554,6 @@
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height + this.yOffset, w: this.width, h: this.height }; }
             getHitbox() {
                 if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5) return null;
-                // 判定框随人物变大
                 if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 200, y: this.y - 200, w: 200, h: 200 };
                 let range = this.attackData.isUlt ? 200 : 160; return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 180, w: range, h: 160 };
             }
@@ -575,7 +587,6 @@
                     if (!isGhost) { if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; } if (this.state === STATE.HIT) { scaleX = 1.2; scaleY = 0.8; } if (this.state === STATE.JUMP) { scaleX = 0.9; scaleY = 1.1; } }
                     ctx.scale(facing * scaleX, scaleY); 
                     
-                    // 🚀 保持宽高比，彻底解决变扁问题
                     const ratio = img.height / img.width;
                     let drawW = hurt.w * 1.1;
                     let drawH = drawW * ratio; 
@@ -661,7 +672,6 @@
                 document.getElementById('p1-img-box').innerHTML = `<img src="${c1.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c1.color}'">`;
                 document.getElementById('p1-stats').innerHTML = this.getStatsHTML(c1); 
                 document.getElementById('p1-ult-text').innerText = `必杀「${c1.ultName}」`; 
-                // 这里的 innerHTML 识别 \n 换行
                 document.getElementById('p1-desc').innerHTML = c1.desc.replace(/\n/g, '<br>');
                 
                 const c2 = CHARACTERS[this.p2Index];
@@ -695,7 +705,6 @@
             requestAnimationFrame(loop);
         }
 
-        // 网页入口：启动流程
         App.init();
         requestAnimationFrame(loop);
     </script>
