@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v2.4</title>
+    <title>十五网页游戏大厅 - v2.5</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -40,17 +40,22 @@
         .menu-bg-grid { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background-image: linear-gradient(rgba(0, 255, 204, 0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 204, 0.2) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg); transform-origin: bottom; animation: gridMove 3s linear infinite; z-index: 1; }
         @keyframes gridMove { from { background-position: 0 0; } to { background-position: 0 40px; } }
 
-        /* 跑马灯公告栏 */
-        .announcement-bar { position: absolute; top: 20px; width: 90%; max-width: 800px; background: rgba(0, 0, 0, 0.6); border: 1px solid #00ffcc; border-radius: 20px; overflow: hidden; white-space: nowrap; padding: 10px 0; box-shadow: 0 0 10px rgba(0,255,204,0.3); z-index: 10; }
-        .announcement-bar span { display: inline-block; padding-left: 100%; animation: marquee 18s linear infinite; color: #fff; font-size: 15px; font-weight: bold; letter-spacing: 1px; }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+        /* 顶部按钮区 */
+        .menu-top-actions { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 10; }
+        .top-btn { background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; transition: 0.3s; font-weight: bold; position: relative; display: flex; align-items: center; gap: 5px; }
+        .top-btn:hover { background: rgba(0, 255, 204, 0.2); box-shadow: 0 0 10px rgba(0,255,204,0.5); }
+        
+        /* 玩前必看角标 */
+        .badge { position: absolute; top: -10px; right: -10px; background: #ff3333; color: white; font-size: 10px; padding: 3px 6px; border-radius: 10px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.5); animation: pulse 1s infinite alternate; }
+        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.1); } }
 
-        .menu-title { position: relative; z-index: 2; font-size: 5vw; font-weight: bold; color: #fff; margin-bottom: 10px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
-        .menu-subtitle { position: relative; z-index: 2; font-size: 1.5vw; color: #00ffcc; margin-bottom: 50px; letter-spacing: 4px; }
+        .menu-title { position: relative; z-index: 2; font-size: 4vw; font-weight: bold; color: #fff; margin-bottom: 10px; margin-top: -30px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
+        .menu-subtitle { position: relative; z-index: 2; font-size: 1.2vw; color: #00ffcc; margin-bottom: 40px; letter-spacing: 4px; }
         
         .menu-grid { position: relative; z-index: 2; display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 90%; }
         
-        .menu-card { width: 260px; height: 340px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); position: relative; overflow: hidden; }
+        /* 缩小卡片尺寸 */
+        .menu-card { width: 210px; height: 260px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); position: relative; overflow: hidden; }
         .menu-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent); transform: skewX(-25deg); transition: 0.5s; }
         .menu-card:hover::before { left: 150%; }
         .menu-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); border-color: rgba(255,255,255,0.3); }
@@ -61,10 +66,25 @@
         .menu-card.locked:hover { transform: none; box-shadow: none; }
         .menu-card.locked:hover::before { left: -100%; }
         
-        .card-icon { font-size: 80px; margin-bottom: 20px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
-        .card-title { font-size: 26px; font-weight: bold; color: #fff; margin-bottom: 10px; letter-spacing: 2px; }
-        .card-desc { font-size: 14px; color: #aaa; text-align: center; padding: 0 20px; line-height: 1.5; }
-        .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 24px; color: #ff4d4d; }
+        .card-icon { font-size: 60px; margin-bottom: 15px; filter: drop-shadow(0 0 10px rgba(255,255,255,0.3)); }
+        .card-title { font-size: 22px; font-weight: bold; color: #fff; margin-bottom: 8px; letter-spacing: 2px; }
+        .card-desc { font-size: 13px; color: #aaa; text-align: center; padding: 0 15px; line-height: 1.4; }
+        .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 20px; color: #ff4d4d; }
+
+        /* ==================== 模态弹窗系统 (公告/FAQ) ==================== */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 500; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-box { background: #1e1e2f; border: 2px solid #00ffcc; border-radius: 15px; width: 90%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,255,204,0.3); transform: translateY(20px); transition: transform 0.3s; }
+        .modal-overlay.show .modal-box { transform: translateY(0); }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .modal-title { font-size: 20px; font-weight: bold; color: #00ffcc; }
+        .modal-close { background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .modal-close:hover { color: #fff; transform: scale(1.1); }
+        
+        .modal-content { padding: 20px; overflow-y: auto; color: #ddd; line-height: 1.6; font-size: 14px; }
+        .modal-content h4 { color: #ffd700; margin-top: 15px; margin-bottom: 5px; font-size: 16px; }
+        .modal-content p { margin-bottom: 10px; }
 
         /* ==================== 3. 选人界面 CSS ==================== */
         #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.5s ease-out, transform 0.5s ease-out; opacity: 0; transform: translateY(20px); }
@@ -147,19 +167,61 @@
         .act-btn:active { transform: scale(0.95); }
         
         /* P1 的按键排布 */
-        .control-side:first-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; } /* 防 在左上 */
-        .control-side:first-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; } /* 必杀 在右上 */
-        .control-side:first-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; } /* 拍 在右下 */
+        .control-side:first-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; }
+        .control-side:first-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; }
+        .control-side:first-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; }
 
         /* P2 的按键排布（完美镜像） */
-        .control-side:last-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 2; } /* 防 在右上 */
-        .control-side:last-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 1; color: #000; } /* 必杀 在左上 */
-        .control-side:last-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 1; } /* 拍 在左下 */
+        .control-side:last-child .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 2; }
+        .control-side:last-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 1; color: #000; }
+        .control-side:last-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 1; }
     </style>
 </head>
 <body>
     <div id="game-container">
         
+        <!-- 模态弹窗：公告 -->
+        <div class="modal-overlay" id="modal-notice">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <div class="modal-title">📢 游戏公告</div>
+                    <button class="modal-close" onclick="closeModal('modal-notice')">×</button>
+                </div>
+                <div class="modal-content">
+                    <h4>🎉 v2.5 震撼更新：</h4>
+                    <p>1. **UI 全面优化**：缩小了主界面的卡片尺寸，排版更精致美观，不再拥挤。</p>
+                    <p>2. **新增独立弹窗**：公告和常见问题改为弹窗显示，点击按钮即可查看。</p>
+                    <p>3. **新增“玩前必看”FAQ**：集中解答了关于操作、图片加载、卡顿等常见疑问。</p>
+                    <p>4. **战斗按键完美镜像**：P1 与 P2 的防、拍、必杀按键现在呈完美的轴对称排列，同屏对战更顺手。</p>
+                    <p>5. **加载极速优化**：大幅降低了图片后台处理的消耗，彻底告别白屏和卡顿。</p>
+                    <p>6. **角色详细资料**：选人界面的技能介绍已全面扩写，包含定位、被动、大招及玩法点评。</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模态弹窗：常见问题 -->
+        <div class="modal-overlay" id="modal-faq">
+            <div class="modal-box">
+                <div class="modal-header">
+                    <div class="modal-title">❓ 常见问题解答</div>
+                    <button class="modal-close" onclick="closeModal('modal-faq')">×</button>
+                </div>
+                <div class="modal-content">
+                    <h4>Q1: 怎么在同一个设备上双人对战？</h4>
+                    <p>A: **电脑端**：P1 使用 W/A/S/D 移动，J 普攻，K 必杀；P2 使用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机/平板**：屏幕左右两侧会自动出现对应的虚拟按键。</p>
+                    
+                    <h4>Q2: 为什么战斗里角色变成了彩色方块？</h4>
+                    <p>A: 这通常是因为图片还在后台下载或抠图。稍等片刻即可自动恢复。如果一直不显示，请检查你上传的图片文件名是否严格为 `char1.png` ~ `char5.png`（注意大小写）。</p>
+                    
+                    <h4>Q3: 为什么我的大招放不出来？</h4>
+                    <p>A: 注意看屏幕左上/右上的**蓝色能量条**。只有能量条全满时（双马尾角色只需 40%），按必杀键才能成功释放大招。</p>
+                    
+                    <h4>Q4: 如何防御？防御会掉血吗？</h4>
+                    <p>A: 按住“防”键即可举起护盾。防御状态下，受到的普通伤害会减少 80%，但仍会被特殊技能（如吕布的大招）扣除百分比血量。</p>
+                </div>
+            </div>
+        </div>
+
         <!-- 开场动画层 -->
         <div id="intro-screen">
             <div class="stars"></div>
@@ -176,9 +238,13 @@
         <div id="menu-screen">
             <div class="menu-bg-grid"></div>
             
-            <!-- 公告栏 -->
-            <div class="announcement-bar">
-                <span>🎉 十五网页游戏 v2.4 震撼更新：1. 修复按键不镜像问题，操作更顺手！2. 优化加载速度，秒开不卡顿。3. 战斗新增【退出】按钮。4. 角色体型大放送，打斗更带感！5. 角色技能介绍全面扩写。6. 主页新增豪华赛博特效！</span>
+            <!-- 顶部操作区 -->
+            <div class="menu-top-actions">
+                <button class="top-btn" onclick="openModal('modal-notice')">📢 公告</button>
+                <button class="top-btn" onclick="openModal('modal-faq')">
+                    ❓ 常见问题
+                    <span class="badge">玩前必看！</span>
+                </button>
             </div>
 
             <div class="menu-title">十五游戏大厅</div>
@@ -268,7 +334,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v2.4</p>
+                <p>测试版 v2.5</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -304,6 +370,25 @@
     </div>
 
     <script>
+        // ==========================================
+        // 弹窗控制逻辑
+        // ==========================================
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.style.display = 'flex';
+            // 强制重绘以触发动画
+            void modal.offsetWidth;
+            modal.classList.add('show');
+        }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
         // ==========================================
         // 流程控制与动画 App
         // ==========================================
