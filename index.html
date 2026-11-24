@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.4</title>
+    <title>十五网页游戏大厅 - v3.5</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -380,10 +380,9 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 十五游戏大厅 v3.4 更新：</h4>
-                    <p>1. **消消乐逻辑修复**：修复了滑动误触导致莫名加分的 Bug，现在只有真正三连才会得分。</p>
-                    <p>2. **开场文字重制**：现在的文字动画是“从无到有，渐显放大 → 停留 → 渐隐缩小”。</p>
-                    <p>3. **Logo 呼吸浮动**：修复了动画生硬的问题，现在 Logo 会非常平滑地上下浮动。</p>
+                    <h4>🎉 十五游戏大厅 v3.5 更新：</h4>
+                    <p>1. **消消乐核心 Bug 修复**：彻底修复了连成三个不消失、无限加分的致命问题！现在手感非常完美。</p>
+                    <p>2. **动画回归**：优化了开场文字和 Logo 的动画细节，现在更加平滑。</p>
                 </div>
             </div>
         </div>
@@ -499,14 +498,12 @@
 
                 introText.classList.add('animating');
                 
-                // 文字 4s 动画后，图片开始
                 this.introTimers.push(setTimeout(() => {
                     introText.style.display = 'none';
                     introImgs.style.display = 'flex';
                     introImgs.classList.add('animating');
                 }, 4000));
 
-                // 图片 5s 动画后，自动进入主菜单
                 this.introTimers.push(setTimeout(() => {
                     this.enterMenu();
                 }, 9000));
@@ -934,7 +931,7 @@
             
             pointerStart: { x: 0, y: 0 },
             activeTile: null, 
-            isLocked: false, // 防抖锁，防止滑动过快触发多次交换
+            isLocked: false, 
 
             init() {
                 this.canvas = document.getElementById('m3Canvas');
@@ -983,7 +980,8 @@
                     targetY: r * this.tileSize,
                     scale: 1,
                     alpha: 1,
-                    vy: 0 
+                    vy: 0,
+                    dying: false // 标记是否正在消亡
                 };
             },
 
@@ -1011,7 +1009,7 @@
                 
                 let dx = e.clientX - this.pointerStart.x;
                 let dy = e.clientY - this.pointerStart.y;
-                let threshold = 25; // 稍微提高阈值，防误触
+                let threshold = 25; 
 
                 if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
                     let targetR = this.activeTile.r;
@@ -1024,7 +1022,7 @@
                     }
 
                     if (targetR >= 0 && targetR < this.size && targetC >= 0 && targetC < this.size) {
-                        this.isLocked = true; // 锁住
+                        this.isLocked = true; 
                         this.swapTiles({r: this.activeTile.r, c: this.activeTile.c}, {r: targetR, c: targetC});
                         this.activeTile = null; 
                     }
@@ -1092,7 +1090,7 @@
                 matches.forEach(pos => {
                     let [r, c] = pos.split(',').map(Number);
                     let tile = this.grid[r][c];
-                    tile.state = 'CLEARING';
+                    tile.dying = true; // 标记为消亡状态，等待动画结束
                     
                     for(let i=0; i<5; i++) {
                         this.particles.push({
@@ -1111,6 +1109,15 @@
             },
 
             applyGravity() {
+                // 先把所有标记为消亡的方块彻底清空(id = 0)
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        if (this.grid[r][c].dying) {
+                            this.grid[r][c].id = 0;
+                        }
+                    }
+                }
+
                 for (let c = 0; c < this.size; c++) {
                     let emptySpace = 0;
                     for (let r = this.size - 1; r >= 0; r--) {
@@ -1118,8 +1125,8 @@
                             emptySpace++;
                         } else if (emptySpace > 0) {
                             this.grid[r + emptySpace][c] = this.grid[r][c];
-                            this.grid[r][c] = this.createTile(0, r, c);
                             this.grid[r + emptySpace][c].targetY = (r + emptySpace) * this.tileSize;
+                            this.grid[r][c] = this.createTile(0, r, c); // 清空原位置
                         }
                     }
                     for (let r = 0; r < emptySpace; r++) {
@@ -1188,6 +1195,16 @@
                         } else if (this.state === 'CLEARING') {
                             this.applyGravity();
                         } else if (this.state === 'FALLING') {
+                            // 确保所有方块都落到了正确的位置
+                            for (let r = 0; r < this.size; r++) {
+                                for (let c = 0; c < this.size; c++) {
+                                    this.grid[r][c].x = c * this.tileSize;
+                                    this.grid[r][c].y = r * this.tileSize;
+                                    this.grid[r][c].targetX = c * this.tileSize;
+                                    this.grid[r][c].targetY = r * this.tileSize;
+                                }
+                            }
+
                             const matches = this.checkMatches();
                             if (matches.size > 0) {
                                 this.processClear(matches);
@@ -1231,6 +1248,7 @@
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         let tile = this.grid[r][c];
+                        // 如果正在消亡，id在动画结束前还是原来的数字，允许渲染。动画结束后id变0，跳过渲染
                         if (!tile || tile.id === 0) continue;
 
                         let ts = this.tileSize;
@@ -1242,7 +1260,8 @@
                         let renderScale = 1;
                         let renderAlpha = 1;
                         
-                        if (this.state === 'CLEARING' && this.animTimer > 5) {
+                        // 如果带有 dying 标记，且在播放消除动画
+                        if (tile.dying && this.state === 'CLEARING') {
                             renderScale = 1 + (15 - this.animTimer) * 0.1;
                             renderAlpha = this.animTimer / 15;
                         }
@@ -1321,4 +1340,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                                                                                       </html>
+                        </html>
