@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五格斗-测试版v1.3</title>
+    <title>十五格斗-测试版v1.4</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #1a1a2e; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; }
@@ -19,13 +19,17 @@
         }
         .select-header { text-align: center; padding: 10px 0; }
         .select-header h1 { font-size: 28px; color: #ffd700; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
-        .select-header p { font-size: 12px; color: #aaa; }
+        
+        /* 提示当前是谁在选 */
+        #select-turn-text { font-size: 18px; font-weight: bold; color: #00ffcc; text-shadow: 1px 1px 0 #000; margin-top: 5px; }
         
         .select-main { flex: 1; display: flex; justify-content: space-between; padding: 0 15px; overflow: hidden; }
         
         /* 左右两侧展示区 */
         .char-showcase { width: 26%; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 10px; }
-        .char-name-badge { background: #ff6699; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid white; margin-bottom: 10px; font-size: 14px; white-space: nowrap; }
+        .char-name-badge { background: #ff6699; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid white; margin-bottom: 10px; font-size: 14px; white-space: nowrap; transition: background 0.3s; }
+        
+        /* 选人界面的全图展示框 */
         .char-img-box { width: 100%; aspect-ratio: 1/1; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: rgba(0,0,0,0.3); border: 2px solid rgba(255,255,255,0.2); }
         .char-img-box img { width: 100%; height: 100%; object-fit: cover; }
         .char-ult { color: #ffd700; font-weight: bold; margin-top: 10px; font-size: 14px; text-shadow: 1px 1px 0 #000; text-align: center; }
@@ -59,34 +63,27 @@
 
         /* ==================== 战斗界面 UI CSS ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
-        
-        /* 顶部血条区 */
         .top-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 20px 0; width: 100%; }
         .hud-player { width: 42%; display: flex; align-items: center; gap: 10px; }
         .hud-player.right { flex-direction: row-reverse; }
         .hud-avatar { width: 70px; height: 70px; border-radius: 50%; border: 3px solid white; background: #333; flex-shrink: 0; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.5); }
         .hud-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        
         .hud-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .hud-name { font-size: 16px; font-weight: bold; color: #fff; text-shadow: 2px 2px 0 #000; }
         .hud-player.right .hud-name { text-align: right; }
-        
         .bar-container { height: 22px; background: #333; border: 2px solid #fff; border-radius: 11px; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .bar-hp { height: 100%; background: linear-gradient(to right, #00ff00, #8bff00); width: 100%; transition: width 0.2s; }
         .hud-player.right .bar-hp { background: linear-gradient(to left, #00ff00, #8bff00); margin-left: auto; }
-        
         .bar-container.energy { height: 12px; border-radius: 6px; width: 80%; margin-top: 4px; }
         .hud-player.right .bar-container.energy { margin-left: auto; }
         .bar-energy { height: 100%; background: linear-gradient(to right, #00ccff, #00ffff); width: 0%; transition: width 0.1s; }
         .hud-player.right .bar-energy { background: linear-gradient(to left, #00ccff, #00ffff); margin-left: auto; }
-
         .timer-box { background: #ffd700; color: #000; font-size: 30px; font-weight: bold; width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); margin-top: 5px; }
 
         /* 触屏控制器 */
         #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-end; padding: 20px; }
         .control-side { display: flex; align-items: flex-end; gap: 20px; pointer-events: auto; }
         
-        /* 摇杆 */
         .joystick { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); position: relative; }
         .joy-btn { position: absolute; width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 8px; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 18px; }
         .joy-btn:active { background: rgba(255,255,255,0.6); }
@@ -95,33 +92,20 @@
         .joy-left { top: 40px; left: 0; width: 35px; border-radius: 8px 0 0 8px; }
         .joy-right { top: 40px; right: 0; width: 35px; border-radius: 0 8px 8px 0; }
 
-        /* 动作按钮 */
         .action-btns { display: grid; grid-template-columns: 60px 60px; grid-template-rows: 60px 60px; gap: 8px; }
         .act-btn { border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: bold; color: #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.5); }
         .act-btn:active { transform: scale(0.95); }
         .btn-block { background: rgba(0, 150, 255, 0.6); grid-area: 1 / 1; }
         .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 2; }
         .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 2; color: #000; }
-
-        /* 提示横屏 */
-        #rotate-notice { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 999; text-align: center; color: white; }
-        @media (orientation: landscape) { #rotate-notice { display: none; } }
     </style>
 </head>
 <body>
-    <div id="rotate-notice">
-        <h2>📱 请横屏游玩以获得最佳体验</h2>
-        <p>旋转你的手机</p>
-    </div>
-
     <div id="game-container">
-        <!-- 渲染画布 -->
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
 
-        <!-- 战斗 HUD UI -->
         <div id="battle-ui">
             <div class="top-hud">
-                <!-- P1 状态 -->
                 <div class="hud-player">
                     <div class="hud-avatar" id="p1-hud-avatar"></div>
                     <div class="hud-bars">
@@ -130,10 +114,7 @@
                         <div class="bar-container energy"><div class="bar-energy" id="p1-hud-energy"></div></div>
                     </div>
                 </div>
-                
                 <div class="timer-box">99</div>
-
-                <!-- P2 状态 -->
                 <div class="hud-player right">
                     <div class="hud-avatar" id="p2-hud-avatar"></div>
                     <div class="hud-bars">
@@ -145,9 +126,7 @@
             </div>
         </div>
 
-        <!-- 触屏控制器 -->
         <div id="touch-controls">
-            <!-- P1 左侧 -->
             <div class="control-side">
                 <div class="joystick">
                     <div class="joy-btn joy-up" data-key="KeyW">▲</div>
@@ -161,8 +140,6 @@
                     <div class="act-btn btn-ult" data-key="KeyK">必杀</div>
                 </div>
             </div>
-
-            <!-- P2 右侧 -->
             <div class="control-side">
                 <div class="action-btns">
                     <div class="act-btn btn-block" data-key="ArrowDown">防</div>
@@ -182,11 +159,10 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v1.3 - 请选择出战角色</p>
+                <div id="select-turn-text">👈 P1 请选择角色</div>
             </div>
             
             <div class="select-main">
-                <!-- 左侧 P1 预览 -->
                 <div class="char-showcase">
                     <div class="char-name-badge" id="p1-name-badge">辣子鸡</div>
                     <div class="char-img-box" id="p1-img-box"></div>
@@ -194,10 +170,8 @@
                     <div class="stats-box" id="p1-stats"></div>
                 </div>
 
-                <!-- 中间角色列表 -->
                 <div class="char-list" id="char-list"></div>
 
-                <!-- 右侧 P2 预览 -->
                 <div class="char-showcase">
                     <div class="char-name-badge" id="p2-name-badge">神秘雌性双马尾</div>
                     <div class="char-img-box" id="p2-img-box"></div>
@@ -213,45 +187,23 @@
     </div>
 
     <script>
-        const GAME_VERSION = "测试版v1.3";
+        const GAME_VERSION = "测试版v1.4";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // 加载抠图的缓存对象
+        const ImageCache = {};
+
         // ==========================================
-        // 1. 角色数据 (加入了图片路径 img)
-        // 注意：请确保你上传的图片名字严格一致，后缀是 .jpg
+        // 1. 角色数据
+        // img 用于选人界面(全图)，img_cut 用于战斗画面(抠图)
         // ==========================================
         const CHARACTERS = [
-            { 
-                id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg",
-                stats: { power: 5, speed: 2, hp: 4 },
-                ultName: "曼巴冲撞", desc: "力量型，攻击力强，机动性与攻速慢。往前进方向进行冲撞。",
-                maxHp: 120, speed: 200, jump: -800, atkDmg: 15, ultCost: 100
-            },
-            { 
-                id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg",
-                stats: { power: 2, speed: 3, hp: 3 },
-                ultName: "打电动", desc: "智慧型，攻击力弱，随时间流逝攻击力变强。射出数据流束缚敌人2秒。",
-                maxHp: 100, speed: 300, jump: -900, atkDmg: 5, ultCost: 100
-            },
-            { 
-                id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg",
-                stats: { power: 2, speed: 5, hp: 2 },
-                ultName: "大狗嚼嚼嚼", desc: "敏捷型，机动与攻速极强，随时间削弱。锁定敌人进行硬控撕咬。",
-                maxHp: 90, speed: 450, jump: -1000, atkDmg: 5, ultCost: 100
-            },
-            { 
-                id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg",
-                stats: { power: 5, speed: 4, hp: 5 },
-                ultName: "方天画戟", desc: "各项指标极强，每10秒属性减弱三分之一。丢出方天画戟减对方四分之一血。",
-                maxHp: 150, speed: 350, jump: -850, atkDmg: 20, ultCost: 100
-            },
-            { 
-                id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg",
-                stats: { power: 1, speed: 1, hp: 1 },
-                ultName: "生理恐吓", desc: "属性极低，大招能量仅需三分之一。硬控对方一秒并夺取血与属性，但前摇可被打断。",
-                maxHp: 60, speed: 180, jump: -700, atkDmg: 3, ultCost: 40
-            }
+            { id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", stats: { power: 5, speed: 2, hp: 4 }, ultName: "曼巴冲撞", desc: "力量型，攻击强，机动慢。往前进方向冲撞。", maxHp: 120, speed: 200, jump: -800, atkDmg: 15, ultCost: 100 },
+            { id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg", img_cut: "char2.png", stats: { power: 2, speed: 3, hp: 3 }, ultName: "打电动", desc: "攻击弱，随时间变强。射出数据流束缚敌人。", maxHp: 100, speed: 300, jump: -900, atkDmg: 5, ultCost: 100 },
+            { id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg", img_cut: "char3.png", stats: { power: 2, speed: 5, hp: 2 }, ultName: "大狗嚼嚼嚼", desc: "机动极强，随时间削弱。锁定敌人硬控撕咬。", maxHp: 90, speed: 450, jump: -1000, atkDmg: 5, ultCost: 100 },
+            { id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg", img_cut: "char4.png", stats: { power: 5, speed: 4, hp: 5 }, ultName: "方天画戟", desc: "各项指标极强，每10秒属性减弱。丢出画戟减对方血。", maxHp: 150, speed: 350, jump: -850, atkDmg: 20, ultCost: 100 },
+            { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", stats: { power: 1, speed: 1, hp: 1 }, ultName: "生理恐吓", desc: "属性低，大招耗能极低。硬控对方并夺取属性，但可被打断。", maxHp: 60, speed: 180, jump: -700, atkDmg: 3, ultCost: 40 }
         ];
 
         const Input = {
@@ -295,13 +247,21 @@
                 this.isP1 = isP1;
                 this.config = CHARACTERS.find(c => c.id === charId);
                 this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0;
-                this.width = 80; this.height = 120; this.facing = isP1 ? 1 : -1;
+                this.width = 120; this.height = 180; // 战斗角色占位更大一点
+                this.facing = isP1 ? 1 : -1;
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp;
                 this.energy = 0; this.maxEnergy = this.config.ultCost;
                 this.state = STATE.IDLE; this.stateTimer = 0; this.hitstop = 0;
                 this.currentAtk = this.config.atkDmg; this.currentSpeed = this.config.speed;
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0;
                 this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
+
+                // 预加载抠图
+                if (!ImageCache[this.config.img_cut]) {
+                    let img = new Image();
+                    img.src = this.config.img_cut;
+                    ImageCache[this.config.img_cut] = img;
+                }
             }
 
             update() {
@@ -325,8 +285,9 @@
                 if (this.state !== STATE.HIT && this.state !== STATE.ATTACK) this.handleInput();
                 this.handleStateLogic();
 
-                this.x += (this.vx * this.currentSpeed / this.config.speed) / 60;
-                if (this.x < 100) this.x = 100; if (this.x > canvas.width - 100) this.x = canvas.width - 100;
+                // 修复：vx现在直接代表像素/秒 的速度
+                this.x += this.vx / 60;
+                if (this.x < 80) this.x = 80; if (this.x > canvas.width - 80) this.x = canvas.width - 80;
             }
 
             handlePassiveSkills() {
@@ -361,8 +322,9 @@
 
                 if (this.state !== STATE.JUMP) {
                     if (up) { this.vy = this.config.jump; this.changeState(STATE.JUMP); }
-                    else if (left) { this.vx = -1; this.facing = -1; this.changeState(STATE.WALK); }
-                    else if (right) { this.vx = 1; this.facing = 1; this.changeState(STATE.WALK); }
+                    // 修复移动：直接赋予速度值
+                    else if (left) { this.vx = -this.currentSpeed; this.facing = -1; this.changeState(STATE.WALK); }
+                    else if (right) { this.vx = this.currentSpeed; this.facing = 1; this.changeState(STATE.WALK); }
                     else { this.vx = 0; this.changeState(STATE.IDLE); }
                 }
             }
@@ -374,18 +336,18 @@
 
                 if (isUltimate) {
                     switch(this.config.id) {
-                        case 1: this.vx = this.facing * 4; this.stateTimer = 30; break;
-                        case 2: Game.projectiles.push(new Projectile(this.x, this.y - 60, this.facing * 700, this, 'data')); this.stateTimer = 40; break;
-                        case 3: Game.triggerGlobalStun(this); this.stateTimer = 40; break;
-                        case 4: Game.projectiles.push(new Projectile(this.x, this.y - 60, this.facing * 900, this, 'halberd')); this.stateTimer = 40; break;
-                        case 5: this.stateTimer = 35; break;
+                        case 1: this.vx = this.facing * 600; this.stateTimer = 30; break; // 冲撞速度
+                        case 2: Game.projectiles.push(new Projectile(this.x, this.y - 80, this.facing * 700, this, 'data')); this.stateTimer = 40; this.vx = 0; break;
+                        case 3: Game.triggerGlobalStun(this); this.stateTimer = 40; this.vx = 0; break;
+                        case 4: Game.projectiles.push(new Projectile(this.x, this.y - 80, this.facing * 900, this, 'halberd')); this.stateTimer = 40; this.vx = 0; break;
+                        case 5: this.stateTimer = 35; this.vx = 0; break;
                     }
-                } else { this.stateTimer = 15; }
+                } else { this.stateTimer = 15; this.vx = 0; }
             }
 
             handleStateLogic() {
                 if (this.state === STATE.HIT) {
-                    this.vx *= 0.9; if (--this.stateTimer <= 0) this.changeState(STATE.IDLE);
+                    this.vx *= 0.8; if (--this.stateTimer <= 0) this.changeState(STATE.IDLE);
                 }
                 if (this.state === STATE.ATTACK) {
                     if (this.config.id === 5 && this.attackData?.isUlt && this.stateTimer === 10 && !this.isUltInterrupted) {
@@ -407,22 +369,22 @@
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height, w: this.width, h: this.height }; }
             getHitbox() {
                 if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5) return null;
-                if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 120, y: this.y - 100, w: 120, h: 100 };
-                let range = this.attackData.isUlt ? 150 : 90;
-                return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 100, w: range, h: 80 };
+                if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 150, y: this.y - 150, w: 150, h: 150 };
+                let range = this.attackData.isUlt ? 150 : 120;
+                return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 140, w: range, h: 120 };
             }
 
             receiveHit(attacker, attackData, type = "normal") {
                 if (this.state === STATE.DEAD) return;
                 if (this.config.id === 5 && this.state === STATE.ATTACK && this.attackData?.isUlt && this.stateTimer > 10) {
-                    this.isUltInterrupted = true; this.changeState(STATE.HIT); this.stateTimer = 30; this.vx = attacker.facing * 6;
+                    this.isUltInterrupted = true; this.changeState(STATE.HIT); this.stateTimer = 30; this.vx = attacker.facing * 400;
                     this.hitstop = 10; attacker.hitstop = 10; return; 
                 }
                 if (type === "halberd") this.hp -= this.maxHp * 0.20; else this.hp -= attackData.dmg;
                 this.energy = Math.min(this.maxEnergy, this.energy + 15);
                 this.hitstop = 6; attacker.hitstop = 6;
                 if (this.hp <= 0) { this.hp = 0; this.changeState(STATE.DEAD); return; }
-                if (this.state !== STATE.BLOCK) { this.changeState(STATE.HIT); this.vx = attacker.facing * 4; }
+                if (this.state !== STATE.BLOCK) { this.changeState(STATE.HIT); this.vx = attacker.facing * 300; }
             }
 
             applyStun(frames) { this.changeState(STATE.STUNNED); this.stunTimer = frames; }
@@ -430,13 +392,35 @@
             render() {
                 const hurt = this.getHurtbox();
                 
-                // 画图片 (如果没有图片则用色块兜底)
-                ctx.fillStyle = this.config.color;
-                ctx.fillRect(hurt.x, hurt.y, hurt.w, hurt.h);
+                // 尝试加载战斗抠图
+                const img = ImageCache[this.config.img_cut];
+                if (img && img.complete && img.naturalWidth > 0) {
+                    // 画抠图
+                    if (this.facing === -1) {
+                        // 翻转绘制
+                        ctx.save();
+                        ctx.translate(this.x, this.y);
+                        ctx.scale(-1, 1);
+                        // 调整绘制参数使人物居中
+                        ctx.drawImage(img, -hurt.w/2, -hurt.h, hurt.w, hurt.h);
+                        ctx.restore();
+                    } else {
+                        ctx.drawImage(img, hurt.x, hurt.y, hurt.w, hurt.h);
+                    }
+                } else {
+                    // 没找到抠图就用色块
+                    ctx.fillStyle = this.config.color;
+                    ctx.fillRect(hurt.x, hurt.y, hurt.w, hurt.h);
+                    // 画个眼睛方便看朝向
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(this.x - 15 + this.facing * 20, this.y - 140, 10, 10);
+                    ctx.fillRect(this.x + 5 + this.facing * 20, this.y - 140, 10, 10);
+                }
 
+                // Debug 判定框
                 if (this.state === STATE.ATTACK) {
                     const hit = this.getHitbox();
-                    if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 2; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
+                    if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
                 }
             }
         }
@@ -454,7 +438,6 @@
                 document.getElementById('p1-hud-name').innerText = this.p1.config.name;
                 document.getElementById('p2-hud-name').innerText = this.p2.config.name;
                 
-                // 设置 HUD 头像加载图片
                 document.getElementById('p1-hud-avatar').innerHTML = `<img src="${this.p1.config.img}" onerror="this.style.display='none'; this.parentElement.style.background='${this.p1.config.color}'">`;
                 document.getElementById('p2-hud-avatar').innerHTML = `<img src="${this.p2.config.img}" onerror="this.style.display='none'; this.parentElement.style.background='${this.p2.config.color}'">`;
             },
@@ -537,6 +520,7 @@
         const UI = {
             p1Selection: 1,
             p2Selection: 5,
+            currentTurn: 1, // 1 代表 P1 在选，2 代表 P2 在选
             
             init() {
                 const list = document.getElementById('char-list');
@@ -547,7 +531,6 @@
                     card.className = 'char-card';
                     card.id = `char-card-${c.id}`;
                     
-                    // 中间列表卡片加载图片
                     card.innerHTML = `
                         <div class="char-avatar">
                             <img src="${c.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c.color}'">
@@ -589,20 +572,33 @@
                 this.updateShowcases();
             },
 
+            // 点击卡片，按回合分配
             selectChar(id) {
-                if (this.p1Selection !== id) this.setP1(id);
-                else this.setP2(id);
+                if (this.currentTurn === 1) {
+                    this.p1Selection = id;
+                    this.currentTurn = 2; // 切换给 P2
+                } else {
+                    this.p2Selection = id;
+                    this.currentTurn = 1; // 切换回 P1
+                }
+                this.updateShowcases();
             },
 
-            setP1(id) { this.p1Selection = id; this.updateShowcases(); },
-            setP2(id) { this.p2Selection = id; this.updateShowcases(); },
+            setP1(id) { this.p1Selection = id; this.currentTurn = 2; this.updateShowcases(); },
+            setP2(id) { this.p2Selection = id; this.currentTurn = 1; this.updateShowcases(); },
 
             updateShowcases() {
+                // 更新提示文字
+                const turnText = document.getElementById('select-turn-text');
+                turnText.innerText = this.currentTurn === 1 ? "👈 P1 请选择角色 (点击列表)" : "👉 P2 请选择角色 (点击列表)";
+                turnText.style.color = this.currentTurn === 1 ? "#00ccff" : "#ff3333";
+
+                // 更新高亮边框
                 document.querySelectorAll('.char-card').forEach(el => el.classList.remove('selected-p1', 'selected-p2'));
                 document.getElementById(`char-card-${this.p1Selection}`).classList.add('selected-p1');
                 document.getElementById(`char-card-${this.p2Selection}`).classList.add('selected-p2');
 
-                // 更新左侧展示 (图片)
+                // 更新左侧 P1 展示 (全图)
                 const c1 = CHARACTERS.find(c => c.id === this.p1Selection);
                 document.getElementById('p1-name-badge').innerText = c1.name;
                 document.getElementById('p1-name-badge').style.background = c1.color;
@@ -610,7 +606,7 @@
                 document.getElementById('p1-ult-text').innerText = `必杀「${c1.ultName}」`;
                 document.getElementById('p1-stats').innerHTML = this.getStatsHTML(c1);
                 
-                // 更新右侧展示 (图片)
+                // 更新右侧 P2 展示 (全图)
                 const c2 = CHARACTERS.find(c => c.id === this.p2Selection);
                 document.getElementById('p2-name-badge').innerText = c2.name;
                 document.getElementById('p2-name-badge').style.background = c2.color;
@@ -639,6 +635,8 @@
                 document.getElementById('battle-ui').style.display = 'none';
                 document.getElementById('select-screen').style.display = 'flex';
                 document.getElementById('select-screen').style.opacity = 1;
+                this.currentTurn = 1; // 重置回合
+                this.updateShowcases();
             },
 
             startGame() {
