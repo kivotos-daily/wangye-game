@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.5</title>
+    <title>十五网页游戏大厅 - v3.7</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -18,27 +18,26 @@
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
         @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
 
-        /* 文字动画：渐显放大 -> 渐隐缩小 */
-        .fade-text { position: absolute; font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; opacity: 0; transform: scale(0.6); }
-        .fade-text.animating { animation: textAnim 4s ease-in-out forwards; }
+        /* 文字动画：极度平滑的渐变 + 缩放 */
+        .fade-text { position: absolute; font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; opacity: 0; transform: scale(0.8); }
+        .fade-text.animating { animation: textAnim 4.5s ease-in-out forwards; }
         @keyframes textAnim {
-            0% { opacity: 0; transform: scale(0.6); }
-            20% { opacity: 1; transform: scale(1.1); }
-            70% { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 0; transform: scale(0.8); }
+            0% { opacity: 0; transform: scale(0.8); filter: blur(5px); }
+            25% { opacity: 1; transform: scale(1); filter: blur(0); }
+            75% { opacity: 1; transform: scale(1.05); filter: blur(0); }
+            100% { opacity: 0; transform: scale(1.1); filter: blur(5px); }
         }
         
-        /* Logo 容器：只负责渐显渐隐 */
+        /* Logo 动画 */
         .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; width: 100%; height: 100%; padding: 20px; }
         .intro-img-group.animating { animation: containerAnim 5s ease-in-out forwards; }
         @keyframes containerAnim {
-            0% { opacity: 0; }
-            20% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; }
+            0% { opacity: 0; transform: translateY(10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-10px); }
         }
 
-        /* Logo 图片：只负责上下浮动 */
         .intro-img-group img { max-width: 80%; max-height: 30vh; margin-bottom: 15px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: floatAnim 3s ease-in-out infinite; }
         @keyframes floatAnim { 
             0% { transform: translateY(0px); } 
@@ -380,9 +379,10 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 十五游戏大厅 v3.5 更新：</h4>
-                    <p>1. **消消乐核心 Bug 修复**：彻底修复了连成三个不消失、无限加分的致命问题！现在手感非常完美。</p>
-                    <p>2. **动画回归**：优化了开场文字和 Logo 的动画细节，现在更加平滑。</p>
+                    <h4>🎉 十五游戏大厅 v3.7 更新：</h4>
+                    <p>1. **保留绿幕抠图，极速加载**：底层加入了异步处理，一进网页就瞬间在后台静默加载并抠图，不卡动画，进游戏马上就能看到透明底的角色！</p>
+                    <p>2. **双马尾Bug修复**：全面修复了“神秘雌性双马尾”无法普攻的物理判定，现在她可以用“拍”正常攻击对手了。</p>
+                    <p>3. **开局动画丝滑**：优化了 CSS 动画曲线，文字和 Logo 切换不再生硬。</p>
                 </div>
             </div>
         </div>
@@ -394,7 +394,7 @@
                     <p>A: 在新版本中，您只需要**按住一个头像，然后向上、下、左、右滑动**，它就会和旁边的头像换位置啦！只要三个相同的头像连成横排或竖排，就能“嘭”地一下消除掉！</p>
                     
                     <h4>Q2: 为什么格斗游戏里的人物像个方块？</h4>
-                    <p>A: 网页打开是秒进的，由于您的原图可能比较大，图片需要一点点时间在后台下载和抠图。稍等几秒钟，图像马上就会“变”出来。</p>
+                    <p>A: 网页打开是秒进的，图片会在后台默默下载并处理绿幕。如果你刚进战斗没看到图，等一两秒钟它就会自动“变”出来。如果一直是方块，请检查图片是否上传正确。</p>
                     
                     <h4>Q3: 怎么和朋友在同一个手机上打格斗？</h4>
                     <p>A: **电脑端**：P1 用 W/A/S/D 移动，J 普攻，K 必杀；P2 用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机端**：屏幕左右两侧会各出现一套虚拟摇杆和按键，一人控制一边！</p>
@@ -489,7 +489,8 @@
             introTimers: [],
             
             init() {
-                setTimeout(preloadAssets, 100);
+                // 【优化点】页面一加载，立刻在后台触发图片下载和抠图，不等待！
+                preloadAssets(); 
                 SaveData.updateDisplay();
 
                 const introText = document.getElementById('intro-text');
@@ -502,11 +503,11 @@
                     introText.style.display = 'none';
                     introImgs.style.display = 'flex';
                     introImgs.classList.add('animating');
-                }, 4000));
+                }, 4500));
 
                 this.introTimers.push(setTimeout(() => {
                     this.enterMenu();
-                }, 9000));
+                }, 9500));
 
                 skipBtn.onclick = () => {
                     AudioEngine.init(); AudioEngine.click();
@@ -586,7 +587,7 @@
         };
 
         // ==========================================
-        // 资源加载与绿幕抠图
+        // 资源加载与绿幕抠图 (一进网页后台静默处理)
         // ==========================================
         const Assets = { images: {}, loaded: 0, total: 0 };
         
@@ -598,10 +599,11 @@
             { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", stats: { power: 1, speed: 1, hp: 1 }, ultName: "生理恐吓", desc: "【定位】终极吸血流。\n【被动】大招耗能极低。\n【大招】生理恐吓：硬控1秒，偷取攻击力、移速和血量，可被打断。", maxHp: 250, speed: 180, jump: -700, atkDmg: 8, ultCost: 40 }
         ];
         
+        // 绿幕抠图函数
         function chromaKeyGreenScreen(img) {
             try {
                 const cvs = document.createElement('canvas');
-                const MAX_WIDTH = 200;
+                const MAX_WIDTH = 250; // 限制大小，保证处理极快
                 const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
                 cvs.width = img.naturalWidth * scale; 
                 cvs.height = img.naturalHeight * scale;
@@ -612,14 +614,18 @@
                 const data = imgData.data;
                 for (let i = 0; i < data.length; i += 4) {
                     let r = data[i], g = data[i+1], b = data[i+2];
+                    // 绿幕特征抠图
                     if (g > r * 1.15 && g > b * 1.15 && g > 40) { data[i+3] = 0; }
                     else if (g > r * 1.05 && g > b * 1.05) { data[i+3] = 128; }
                 }
                 c.putImageData(imgData, 0, 0);
                 return cvs; 
-            } catch (e) { return img; }
+            } catch (e) { 
+                return img; 
+            }
         }
 
+        // 一进网页立刻加载
         function preloadAssets() {
             let urls = [];
             CHARACTERS.forEach(c => { urls.push(c.img); urls.push(c.img_cut); });
@@ -629,9 +635,13 @@
                 let img = new Image();
                 img.src = url;
                 img.onload = () => {
+                    // 使用 requestIdleCallback 或 setTimeout 利用空闲时间抠图，绝不卡动画
                     (window.requestIdleCallback || setTimeout)(() => {
-                        if (url.endsWith('.png')) Assets.images[url] = chromaKeyGreenScreen(img);
-                        else Assets.images[url] = img;
+                        if (url.endsWith('.png')) {
+                            Assets.images[url] = chromaKeyGreenScreen(img);
+                        } else {
+                            Assets.images[url] = img;
+                        }
                     });
                 };
             });
@@ -731,7 +741,8 @@
             changeState(s) { this.state = s; if (s === STATE.ATTACK) return; this.stateTimer = s === STATE.HIT ? 20 : 0; }
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height + this.yOffset, w: this.width, h: this.height }; }
             getHitbox() {
-                if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5 || this.config.id === 999) return null;
+                // 【修复】删除了 config.id === 5 的限制，双马尾可以正常物理攻击了
+                if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 999) return null;
                 if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 200, y: this.y - 200, w: 200, h: 200 };
                 let range = this.attackData.isUlt ? 200 : 160; return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 180, w: range, h: 160 };
             }
@@ -981,7 +992,7 @@
                     scale: 1,
                     alpha: 1,
                     vy: 0,
-                    dying: false // 标记是否正在消亡
+                    dying: false
                 };
             },
 
@@ -1090,7 +1101,7 @@
                 matches.forEach(pos => {
                     let [r, c] = pos.split(',').map(Number);
                     let tile = this.grid[r][c];
-                    tile.dying = true; // 标记为消亡状态，等待动画结束
+                    tile.dying = true; 
                     
                     for(let i=0; i<5; i++) {
                         this.particles.push({
@@ -1109,7 +1120,6 @@
             },
 
             applyGravity() {
-                // 先把所有标记为消亡的方块彻底清空(id = 0)
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         if (this.grid[r][c].dying) {
@@ -1126,7 +1136,7 @@
                         } else if (emptySpace > 0) {
                             this.grid[r + emptySpace][c] = this.grid[r][c];
                             this.grid[r + emptySpace][c].targetY = (r + emptySpace) * this.tileSize;
-                            this.grid[r][c] = this.createTile(0, r, c); // 清空原位置
+                            this.grid[r][c] = this.createTile(0, r, c); 
                         }
                     }
                     for (let r = 0; r < emptySpace; r++) {
@@ -1183,19 +1193,17 @@
                                 this.combo = 0;
                                 this.processClear(matches);
                             } else {
-                                // 没匹配，换回原位
                                 let {p1, p2, t1, t2} = this.animData;
                                 this.grid[p1.r][p1.c] = t1; this.grid[p2.r][p2.c] = t2;
                                 t1.targetX = p1.c * this.tileSize; t1.targetY = p1.r * this.tileSize;
                                 t2.targetX = p2.c * this.tileSize; t2.targetY = p2.r * this.tileSize;
                                 this.state = 'IDLE';
-                                this.isLocked = false; // 解锁
+                                this.isLocked = false; 
                                 AudioEngine.error();
                             }
                         } else if (this.state === 'CLEARING') {
                             this.applyGravity();
                         } else if (this.state === 'FALLING') {
-                            // 确保所有方块都落到了正确的位置
                             for (let r = 0; r < this.size; r++) {
                                 for (let c = 0; c < this.size; c++) {
                                     this.grid[r][c].x = c * this.tileSize;
@@ -1210,7 +1218,7 @@
                                 this.processClear(matches);
                             } else {
                                 this.state = 'IDLE';
-                                this.isLocked = false; // 解锁
+                                this.isLocked = false;
                                 this.checkDeadlock();
                             }
                         }
@@ -1248,7 +1256,6 @@
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         let tile = this.grid[r][c];
-                        // 如果正在消亡，id在动画结束前还是原来的数字，允许渲染。动画结束后id变0，跳过渲染
                         if (!tile || tile.id === 0) continue;
 
                         let ts = this.tileSize;
@@ -1260,7 +1267,6 @@
                         let renderScale = 1;
                         let renderAlpha = 1;
                         
-                        // 如果带有 dying 标记，且在播放消除动画
                         if (tile.dying && this.state === 'CLEARING') {
                             renderScale = 1 + (15 - this.animTimer) * 0.1;
                             renderAlpha = this.animTimer / 15;
@@ -1340,4 +1346,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-                        </html>
+    </html>
