@@ -2,30 +2,138 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 【版本迭代点 1】网页标签标题 -->
-    <title>十五格斗-测试版v1.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>十五格斗-测试版v1.1</title>
     <style>
-        body { margin: 0; padding: 0; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: white; font-family: sans-serif; }
-        #ui-layer { position: absolute; top: 10px; text-align: center; }
-        .version-tag { color: #ffcc00; font-weight: bold; font-size: 14px; }
-        canvas { box-shadow: 0 0 20px rgba(0,0,0,0.8); border: 2px solid #333; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+        body { margin: 0; padding: 0; background: #1a1a2e; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; color: white; font-family: sans-serif; overflow: hidden; }
+        
+        #game-container { position: relative; width: 100%; max-width: 1000px; aspect-ratio: 5/3; }
+        canvas { width: 100%; height: 100%; box-shadow: 0 0 20px rgba(0,0,0,0.8); border: 2px solid #333; display: block; }
+        
+        #ui-layer { position: absolute; top: 5px; width: 100%; text-align: center; pointer-events: none; font-size: 12px; z-index: 10; }
+        .version-tag { color: #ffcc00; font-weight: bold; }
+
+        /* 触屏控制器层 */
+        #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 20; }
+        .control-group { position: absolute; bottom: 5%; display: flex; align-items: flex-end; gap: 15px; pointer-events: auto; }
+        
+        /* 左侧 P1，右侧 P2 */
+        #p1-controls { left: 2%; }
+        #p2-controls { right: 2%; flex-direction: row-reverse; }
+
+        /* 方向键区 */
+        .d-pad { display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(3, 40px); gap: 2px; opacity: 0.7; }
+        .d-btn { background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 8px; display: flex; justify-content: center; align-items: center; font-weight: bold; color: #fff; font-size: 18px; }
+        .d-btn:active { background: rgba(255, 255, 255, 0.8); }
+        .d-up { grid-area: 1 / 2; }
+        .d-left { grid-area: 2 / 1; }
+        .d-down { grid-area: 3 / 2; }
+        .d-right { grid-area: 2 / 3; }
+
+        /* 动作按键区 */
+        .action-btns { display: grid; grid-template-columns: repeat(2, 50px); grid-template-rows: repeat(2, 50px); gap: 5px; opacity: 0.8; }
+        .a-btn { background: rgba(255, 100, 100, 0.5); border: 2px solid rgba(255, 100, 100, 0.8); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 14px; }
+        .a-btn:active { background: rgba(255, 100, 100, 0.9); }
+        .a-atk { grid-area: 1 / 2; }
+        .a-ult { grid-area: 2 / 1; background: rgba(100, 100, 255, 0.5); border-color: rgba(100, 100, 255, 0.8); }
+        .a-ult:active { background: rgba(100, 100, 255, 0.9); }
+
+        /* 提示横屏 */
+        #rotate-notice { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 999; text-align: center; }
+        @media (orientation: landscape) { #rotate-notice { display: none; } }
+        /* 只有在触屏设备上才显示虚拟按键 */
+        @media (pointer: coarse) { #touch-controls { display: block; } }
     </style>
 </head>
 <body>
-    <!-- 【版本迭代点 2】页面 UI 标题 -->
-    <div id="ui-layer">
-        <h2>十五格斗 <span class="version-tag">测试版v1.0</span></h2>
-        <h3>P1 选择：按 1-5 选择角色 | P2 选择：按 小键盘 7-0 选择角色</h3>
-        <h3 style="color: #00ff00">按 空格键 开始/重新开始</h3>
+    <div id="rotate-notice">
+        <h2>📱 请横屏游玩以获得最佳体验</h2>
+        <p>旋转你的手机</p>
     </div>
-    <canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <h2>十五格斗 <span class="version-tag">测试版v1.1</span></h2>
+            <h3 style="color: #00ff00; font-size: 14px; margin: 5px 0;">键盘: P1(1-5/空格) P2(小键盘7-0) | 触屏: 左右两侧虚拟按键</h3>
+        </div>
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+
+        <!-- 虚拟按键层 -->
+        <div id="touch-controls">
+            <!-- P1 控制区 -->
+            <div class="control-group" id="p1-controls">
+                <div class="d-pad">
+                    <div class="d-btn d-up" data-key="KeyW">▲</div>
+                    <div class="d-btn d-left" data-key="KeyA">◀</div>
+                    <div class="d-btn d-down" data-key="KeyS">▼</div>
+                    <div class="d-btn d-right" data-key="KeyD">▶</div>
+                </div>
+                <div class="action-btns">
+                    <div class="a-btn a-atk" data-key="KeyJ">拍</div>
+                    <div class="a-btn a-ult" data-key="KeyK">必杀</div>
+                </div>
+            </div>
+
+            <!-- P2 控制区 -->
+            <div class="control-group" id="p2-controls">
+                <div class="d-pad">
+                    <div class="d-btn d-up" data-key="ArrowUp">▲</div>
+                    <div class="d-btn d-left" data-key="ArrowLeft">◀</div>
+                    <div class="d-btn d-down" data-key="ArrowDown">▼</div>
+                    <div class="d-btn d-right" data-key="ArrowRight">▶</div>
+                </div>
+                <div class="action-btns">
+                    <div class="a-btn a-atk" data-key="Numpad1">拍</div>
+                    <div class="a-btn a-ult" data-key="Numpad2">必杀</div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // 【版本迭代点 3】游戏核心版本号常量
-        const GAME_VERSION = "测试版v1.0";
-
+        const GAME_VERSION = "测试版v1.1";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+
+        // ==========================================
+        // 1. 输入系统 (兼容键盘与触屏)
+        // ==========================================
+        const Input = {
+            keys: {}, prevKeys: {},
+            init() { 
+                window.addEventListener('keydown', e => this.keys[e.code] = true); 
+                window.addEventListener('keyup', e => this.keys[e.code] = false); 
+            },
+            bindTouch() {
+                const buttons = document.querySelectorAll('[data-key]');
+                buttons.forEach(btn => {
+                    const key = btn.getAttribute('data-key');
+                    
+                    // 阻止默认的滚动和长按选中
+                    const start = (e) => { e.preventDefault(); this.keys[key] = true; btn.style.background = 'rgba(255, 255, 255, 0.9)'; };
+                    const end = (e) => { e.preventDefault(); this.keys[key] = false; btn.style.background = ''; };
+
+                    btn.addEventListener('touchstart', start, {passive: false});
+                    btn.addEventListener('touchend', end);
+                    btn.addEventListener('touchcancel', end);
+                    // 兼容鼠标点击测试
+                    btn.addEventListener('mousedown', start);
+                    btn.addEventListener('mouseup', end);
+                    btn.addEventListener('mouseleave', end);
+                });
+            },
+            isDown(code) { return !!this.keys[code]; },
+            isJustPressed(code) { return this.keys[code] && !this.prevKeys[code]; },
+            update() { this.prevKeys = { ...this.keys }; }
+        };
+        Input.init();
+        Input.bindTouch();
+
+        // ==========================================
+        // 2. 游戏数据 (不变)
+        // ==========================================
+        const STATE = { IDLE: 0, WALK: 1, JUMP: 2, BLOCK: 3, HIT: 4, ATTACK: 5, DEAD: 6, STUNNED: 7 };
 
         const CHARACTERS = [
             { id: 1, name: "辣子鸡", type: "力量型", maxHp: 120, speed: 200, jump: -800, atkDmg: 15, color: "#ff4d4d", ultCost: 100 },
@@ -35,22 +143,10 @@
             { id: 5, name: "双马尾", type: "精神型", maxHp: 60, speed: 180, jump: -700, atkDmg: 3, color: "#ff99cc", ultCost: 40 }
         ];
 
-        const Input = {
-            keys: {}, prevKeys: {},
-            init() { window.addEventListener('keydown', e => this.keys[e.code] = true); window.addEventListener('keyup', e => this.keys[e.code] = false); },
-            isDown(code) { return !!this.keys[code]; },
-            isJustPressed(code) { return this.keys[code] && !this.prevKeys[code]; },
-            update() { this.prevKeys = { ...this.keys }; }
-        };
-        Input.init();
-
-        const STATE = { IDLE: 0, WALK: 1, JUMP: 2, BLOCK: 3, HIT: 4, ATTACK: 5, DEAD: 6, STUNNED: 7 };
-
         class Projectile {
             constructor(x, y, vx, owner, type) {
                 this.x = x; this.y = y; this.vx = vx; this.owner = owner; this.type = type;
-                this.width = type === 'halberd' ? 60 : 40;
-                this.height = type === 'halberd' ? 20 : 40;
+                this.width = type === 'halberd' ? 60 : 40; this.height = type === 'halberd' ? 20 : 40;
                 this.active = true; this.life = 120;
             }
             update() {
@@ -64,27 +160,20 @@
             constructor(isP1, charId) {
                 this.isP1 = isP1;
                 this.config = CHARACTERS.find(c => c.id === charId);
-                this.x = isP1 ? 250 : 750;
-                this.y = 500; this.vx = 0; this.vy = 0;
+                this.x = isP1 ? 250 : 750; this.y = 500; this.vx = 0; this.vy = 0;
                 this.width = 60; this.height = 100; this.facing = isP1 ? 1 : -1;
-                
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp;
                 this.energy = 0; this.maxEnergy = this.config.ultCost;
-                
                 this.state = STATE.IDLE; this.stateTimer = 0; this.hitstop = 0;
                 this.currentAtk = this.config.atkDmg; this.currentSpeed = this.config.speed;
-                
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0;
-                this.hasHitThisAttack = false; this.attackData = null;
-                this.isUltInterrupted = false; 
+                this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
             }
 
             update() {
                 if (this.state === STATE.DEAD) return;
                 if (this.hitstop > 0) { this.hitstop--; return; }
-
-                this.matchTime++;
-                this.handlePassiveSkills();
+                this.matchTime++; this.handlePassiveSkills();
 
                 if (this.state === STATE.STUNNED) {
                     this.stunTimer--; this.vx = 0;
@@ -132,7 +221,6 @@
 
                 if (down && this.y >= 500) { this.changeState(STATE.BLOCK); this.vx = 0; return; }
                 if (atk) { this.startAttack(false); return; }
-                
                 if (ult && this.energy >= this.maxEnergy && this.state !== STATE.ATTACK) { 
                     this.energy = 0; this.startAttack(true); return; 
                 }
@@ -159,15 +247,12 @@
                         case 4: Game.projectiles.push(new Projectile(this.x, this.y - 50, this.facing * 800, this, 'halberd')); this.stateTimer = 40; break;
                         case 5: this.stateTimer = 35; break;
                     }
-                } else {
-                    this.stateTimer = 15;
-                }
+                } else { this.stateTimer = 15; }
             }
 
             handleStateLogic() {
                 if (this.state === STATE.HIT) {
-                    this.vx *= 0.9;
-                    if (--this.stateTimer <= 0) this.changeState(STATE.IDLE);
+                    this.vx *= 0.9; if (--this.stateTimer <= 0) this.changeState(STATE.IDLE);
                 }
                 if (this.state === STATE.ATTACK) {
                     if (this.config.id === 5 && this.attackData?.isUlt && this.stateTimer === 10 && !this.isUltInterrupted) {
@@ -189,56 +274,38 @@
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height, w: this.width, h: this.height }; }
             getHitbox() {
                 if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5) return null;
-                
-                if (this.config.id === 1 && this.attackData.isUlt) {
-                    return { x: this.facing === 1 ? this.x : this.x - 100, y: this.y - 80, w: 100, h: 80 };
-                }
-
+                if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 100, y: this.y - 80, w: 100, h: 80 };
                 let range = this.attackData.isUlt ? 120 : 70;
                 return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 80, w: range, h: 60 };
             }
 
             receiveHit(attacker, attackData, type = "normal") {
                 if (this.state === STATE.DEAD) return;
-
                 if (this.config.id === 5 && this.state === STATE.ATTACK && this.attackData?.isUlt && this.stateTimer > 10) {
-                    this.isUltInterrupted = true;
-                    this.changeState(STATE.HIT);
-                    this.stateTimer = 30; 
-                    this.vx = attacker.facing * 4;
-                    this.hitstop = 10; attacker.hitstop = 10;
-                    return; 
+                    this.isUltInterrupted = true; this.changeState(STATE.HIT); this.stateTimer = 30; this.vx = attacker.facing * 4;
+                    this.hitstop = 10; attacker.hitstop = 10; return; 
                 }
-
-                if (type === "halberd") this.hp -= this.maxHp * 0.20;
-                else this.hp -= attackData.dmg;
-
+                if (type === "halberd") this.hp -= this.maxHp * 0.20; else this.hp -= attackData.dmg;
                 this.energy = Math.min(this.maxEnergy, this.energy + 15);
                 this.hitstop = 6; attacker.hitstop = 6;
-                
                 if (this.hp <= 0) { this.hp = 0; this.changeState(STATE.DEAD); return; }
-                if (this.state !== STATE.BLOCK) {
-                    this.changeState(STATE.HIT);
-                    this.vx = attacker.facing * 2;
-                }
+                if (this.state !== STATE.BLOCK) { this.changeState(STATE.HIT); this.vx = attacker.facing * 2; }
             }
 
             applyStun(frames) { this.changeState(STATE.STUNNED); this.stunTimer = frames; }
 
             render() {
                 const hurt = this.getHurtbox();
-                ctx.fillStyle = this.config.color;
-                ctx.fillRect(hurt.x, hurt.y, hurt.w, hurt.h);
-                
+                ctx.fillStyle = this.config.color; ctx.fillRect(hurt.x, hurt.y, hurt.w, hurt.h);
                 ctx.fillStyle = 'white'; ctx.font = '14px Arial'; ctx.textAlign = 'center';
                 ctx.fillText(this.config.name, this.x, this.y - 110);
+                
                 if (this.config.id === 4 && this.buffTickTimer > 500) { ctx.fillStyle = 'yellow'; ctx.fillText("警告:即将杀死义父", this.x, this.y - 130); }
                 if (this.config.id === 5 && this.state === STATE.ATTACK && this.attackData?.isUlt && !this.isUltInterrupted) {
                     ctx.fillStyle = '#ff00ff'; ctx.fillText("施法中...", this.x, this.y - 130);
                     ctx.fillStyle = '#555'; ctx.fillRect(this.x - 30, this.y - 125, 60, 5);
                     ctx.fillStyle = '#ff00ff'; ctx.fillRect(this.x - 30, this.y - 125, 60 * ((35 - this.stateTimer) / 25), 5);
                 }
-
                 if (this.state === STATE.ATTACK) {
                     const hit = this.getHitbox();
                     if (hit) { ctx.strokeStyle = 'red'; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
@@ -248,109 +315,69 @@
 
         const Game = {
             p1: null, p2: null, projectiles: [], isRunning: false, matchOver: false,
-            
             init(c1, c2) {
-                this.p1 = new Fighter(true, c1);
-                this.p2 = new Fighter(false, c2);
-                this.projectiles = [];
-                this.isRunning = true; this.matchOver = false;
+                this.p1 = new Fighter(true, c1); this.p2 = new Fighter(false, c2);
+                this.projectiles = []; this.isRunning = true; this.matchOver = false;
             },
-
             triggerFearEffect(caster) {
-                const target = caster.isP1 ? this.p2 : this.p1;
-                if (target.state === STATE.DEAD) return;
-                
-                target.applyStun(60);
-                
-                let drain = 15;
-                target.hp = Math.max(0, target.hp - drain);
-                caster.hp = Math.min(caster.maxHp, caster.hp + drain);
-                
-                target.currentAtk = Math.max(1, target.currentAtk - 2);
-                target.currentSpeed = Math.max(50, target.currentSpeed - 15);
-                
-                caster.currentAtk += 2;
-                caster.currentSpeed += 15;
-                
+                const target = caster.isP1 ? this.p2 : this.p1; if (target.state === STATE.DEAD) return;
+                target.applyStun(60); let drain = 15;
+                target.hp = Math.max(0, target.hp - drain); caster.hp = Math.min(caster.maxHp, caster.hp + drain);
+                target.currentAtk = Math.max(1, target.currentAtk - 2); target.currentSpeed = Math.max(50, target.currentSpeed - 15);
+                caster.currentAtk += 2; caster.currentSpeed += 15;
                 target.hitstop = 10; caster.hitstop = 10;
-
                 if (target.hp <= 0) { target.hp = 0; target.changeState(STATE.DEAD); }
             },
-
             triggerGlobalStun(attacker) {
                 const target = attacker.isP1 ? this.p2 : this.p1;
-                if (Math.abs(attacker.x - target.x) < 200) {
-                    target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 15; 
-                }
+                if (Math.abs(attacker.x - target.x) < 200) { target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 15; }
             },
-
             tick() {
                 if (!this.isRunning || this.matchOver) return;
-
                 this.p1.update(); this.p2.update();
                 this.projectiles.forEach(p => p.update());
                 this.projectiles = this.projectiles.filter(p => p.active);
-
                 this.checkCombat(this.p1, this.p2); this.checkCombat(this.p2, this.p1);
-
                 this.projectiles.forEach(p => {
                     const target = p.owner === this.p1 ? this.p2 : this.p1;
                     if (this.checkAABB(p.getHurtbox(), target.getHurtbox())) {
                         p.active = false;
-                        if (p.type === 'data') { 
-                            target.applyStun(120);
-                            target.hp -= 5;       
-                        }
+                        if (p.type === 'data') { target.applyStun(120); target.hp -= 5; }
                         else if (p.type === 'halberd') target.receiveHit(p.owner, { dmg: 0 }, "halberd");
                     }
                 });
-
                 if (this.p1.hp <= 0 || this.p2.hp <= 0) {
                     this.matchOver = true;
-                    // 【版本迭代点 4】游戏结束文案加入版本号
-                    document.getElementById('ui-layer').innerHTML = `<h1>Game Over! ${this.p1.hp <= 0 ? '2P' : '1P'} 胜利!</h1><h3 style="color: #ffcc00">当前版本: ${GAME_VERSION}</h3><h3>按 空格键 重新开始</h3>`;
+                    document.getElementById('ui-layer').innerHTML = `<h1>Game Over! ${this.p1.hp <= 0 ? '2P' : '1P'} 胜利!</h1><h3 style="color: #ffcc00">版本: ${GAME_VERSION}</h3><h3>点击屏幕/按空格键重新开始</h3>`;
                 }
             },
-
             checkCombat(attacker, target) {
                 const hit = attacker.getHitbox(); const hurt = target.getHurtbox();
                 if (hit && !attacker.hasHitThisAttack && this.checkAABB(hit, hurt)) {
-                    attacker.hasHitThisAttack = true;
-                    target.receiveHit(attacker, attacker.attackData);
+                    attacker.hasHitThisAttack = true; target.receiveHit(attacker, attacker.attackData);
                 }
             },
-
             checkAABB(r1, r2) { return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; },
-
             render() {
                 ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#222'; ctx.fillRect(0, 500, canvas.width, 100);
-                
                 if (this.isRunning) {
                     this.p1.render(); this.p2.render();
-                    
                     this.projectiles.forEach(p => {
                         ctx.fillStyle = p.type === 'data' ? '#00ffff' : '#ffaa00';
                         const h = p.getHurtbox(); ctx.fillRect(h.x, h.y, h.w, h.h);
                     });
-
                     this.drawHealthBar(50, 50, this.p1, false);
                     this.drawHealthBar(canvas.width - 350, 50, this.p2, true);
-                    
-                    // 【版本迭代点 5】画面右下角常驻显示版本号
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; 
-                    ctx.font = '12px Arial'; 
-                    ctx.textAlign = 'right';
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)'; ctx.font = '12px Arial'; ctx.textAlign = 'right';
                     ctx.fillText(`十五格斗 ${GAME_VERSION}`, canvas.width - 20, canvas.height - 20);
                 }
             },
-
             drawHealthBar(x, y, fighter, isRight) {
                 ctx.fillStyle = '#333'; ctx.fillRect(x, y, 300, 20);
                 ctx.fillStyle = '#ff3333'; ctx.fillRect(x, y, 300 * (fighter.hp / fighter.maxHp), 20);
                 ctx.fillStyle = '#fff'; ctx.font = '16px Arial'; ctx.textAlign = isRight ? 'right' : 'left';
                 ctx.fillText(`${fighter.config.name} (${fighter.config.type})`, isRight ? x + 300 : x, y - 10);
-                
                 ctx.fillStyle = '#333'; ctx.fillRect(x, y + 25, 200, 10);
                 ctx.fillStyle = '#00ccff'; ctx.fillRect(x, y + 25, 200 * (fighter.energy / fighter.maxEnergy), 10);
             }
@@ -359,6 +386,15 @@
         let acc = 0, lastTime = performance.now();
         let selecting = true;
         let p1Selection = 1, p2Selection = 5;
+
+        // 让触屏也能点击开始
+        canvas.addEventListener('touchstart', (e) => {
+            if (selecting || Game.matchOver) {
+                // 触发一个伪造的空格键
+                Input.keys['Space'] = true;
+                setTimeout(() => Input.keys['Space'] = false, 100);
+            }
+        });
 
         function loop(time) {
             const dt = (time - lastTime) / 1000; lastTime = time;
@@ -384,7 +420,7 @@
             } else {
                 if (Input.isJustPressed('Space') && Game.matchOver) {
                     selecting = true;
-                    document.getElementById('ui-layer').innerHTML = `<h2>十五格斗 <span class="version-tag">${GAME_VERSION}</span></h2><h3>P1 选择：按 1-5 选择角色 | P2 选择：按 小键盘 7-0 选择角色</h3><h3 style="color: #00ff00">按 空格键 开始/重新开始</h3>`;
+                    document.getElementById('ui-layer').innerHTML = `<h2>十五格斗 <span class="version-tag">${GAME_VERSION}</span></h2><h3 style="color: #00ff00">点击屏幕开始 / 键盘空格</h3>`;
                 }
                 
                 acc += dt;
@@ -397,14 +433,13 @@
         function renderSelectScreen() {
             ctx.fillStyle = '#111'; ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#fff'; ctx.font = '30px Arial'; ctx.textAlign = 'center';
-            ctx.fillText("十五格斗 - 选择角色", canvas.width/2, 80);
+            ctx.fillText("十五格斗 - 选择角色 (点击屏幕开始)", canvas.width/2, 80);
 
             CHARACTERS.forEach((c, i) => {
                 let x = 100 + i * 160; let y = 200; 
                 ctx.fillStyle = c.color; ctx.fillRect(x, y, 100, 100);
                 if (p1Selection === c.id) { ctx.strokeStyle = 'blue'; ctx.lineWidth = 6; ctx.strokeRect(x, y, 100, 100); }
                 if (p2Selection === c.id) { ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.strokeRect(x-3, y-3, 106, 106); }
-                
                 ctx.fillStyle = 'white'; ctx.font = '16px Arial';
                 ctx.fillText(c.name, x + 50, y + 130);
                 ctx.fillText(c.type, x + 50, y + 150);
