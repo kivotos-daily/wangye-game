@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v2.0</title>
+    <title>十五网页游戏大厅 - v2.1</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -12,18 +12,34 @@
         canvas { width: 100%; height: 100%; display: block; }
 
         /* ==================== 1. 开场动画 CSS ==================== */
-        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
-        .fade-text { font-size: 50px; font-weight: bold; letter-spacing: 5px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
-        .intro-img-group { display: none; flex-direction: column; align-items: center; opacity: 0; transition: opacity 1.5s ease-in-out; }
-        .intro-img-group img { max-width: 400px; max-height: 300px; margin-bottom: 20px; border-radius: 15px; object-fit: contain; background: #222; }
-        .intro-credit { font-size: 20px; color: #00ccff; font-weight: bold; margin-top: 10px; text-shadow: 0 0 10px rgba(0,204,255,0.5); }
+        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; }
+        
+        /* 动态星空背景 */
+        .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
+        @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
+
+        .fade-text { font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; transform: scale(0.9); }
+        .fade-text.show { opacity: 1; transform: scale(1); }
+        
+        .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease-in-out; width: 100%; height: 100%; padding: 20px; }
+        .intro-img-group.show { opacity: 1; }
+        
+        .intro-img-group img { max-width: 80%; max-height: 35vh; margin-bottom: 10px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite; }
+        
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+
+        .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
+
+        /* 跳过按钮 */
+        .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; z-index: 210; transition: 0.3s; backdrop-filter: blur(5px); }
+        .skip-btn:hover { background: rgba(255,255,255,0.3); }
 
         /* ==================== 2. 游戏大厅主菜单 CSS ==================== */
         #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1f1c2c, #4b1b73); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 150; opacity: 0; transition: opacity 1s; }
-        .menu-title { font-size: 40px; font-weight: bold; color: #ffd700; margin-bottom: 40px; text-shadow: 2px 2px 0 #000; letter-spacing: 4px; }
-        .menu-grid { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
+        .menu-title { font-size: 5vw; font-weight: bold; color: #ffd700; margin-bottom: 40px; text-shadow: 2px 2px 0 #000; letter-spacing: 4px; }
+        .menu-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 90%; }
         
-        .menu-card { width: 250px; height: 320px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
+        .menu-card { width: 250px; height: 320px; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); position: relative; }
         .menu-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.5); }
         .menu-card.active { border-color: #00ffcc; background: rgba(0, 255, 204, 0.1); box-shadow: 0 0 20px rgba(0,255,204,0.4); }
         
@@ -32,32 +48,25 @@
         
         .card-icon { font-size: 70px; margin-bottom: 20px; }
         .card-title { font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 10px; }
-        .card-desc { font-size: 14px; color: #aaa; text-align: center; padding: 0 20px; }
-        
-        /* 锁图标 */
+        .card-desc { font-size: 14px; color: #aaa; text-align: center; padding: 0 20px; line-height: 1.5; }
         .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 24px; color: #ff4d4d; }
 
-        /* ==================== 3. 选人界面 CSS ==================== */
+        /* ==================== 3. 选人与战斗 CSS (保持原有逻辑) ==================== */
         #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.3s; }
         .select-header { text-align: center; padding: 10px 0; }
         .select-header h1 { font-size: 28px; color: #ffd700; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
-        
         .select-main { flex: 1; display: flex; justify-content: space-between; padding: 0 20px; overflow: hidden; }
         .player-panel { width: 46%; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; position: relative; border: 2px solid transparent; }
         .player-panel.p1-active { border-color: #00ccff; box-shadow: 0 0 15px rgba(0,204,255,0.3); }
         .player-panel.p2-active { border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.3); }
-
         .player-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
         .p1-title { color: #00ccff; } .p2-title { color: #ff3333; }
-
         .char-selector { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 10px; }
         .nav-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
         .nav-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
         .char-name-badge { background: #333; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid white; font-size: 16px; text-align: center; flex: 1; margin: 0 10px; }
-        
-        .char-img-box { width: 100%; height: 220px; border-radius: 15px; display: flex; justify-content: center; align-items: flex-end; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.5) 100%); border: 2px solid rgba(255,255,255,0.2); }
+        .char-img-box { width: 100%; height: 200px; border-radius: 15px; display: flex; justify-content: center; align-items: flex-end; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(0,0,0,0.5) 100%); border: 2px solid rgba(255,255,255,0.2); }
         .char-img-box img { width: 90%; height: 95%; object-fit: contain; filter: drop-shadow(0 0 10px rgba(0,200,255,0.5)); }
-        
         .stats-box { width: 100%; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 10px; }
         .stat-row { display: flex; align-items: center; margin-bottom: 4px; }
         .stat-label { width: 35px; font-size: 12px; color: #aaa; }
@@ -66,16 +75,13 @@
         .stat-seg.active { background: #00ccff; }
         .stat-seg.active.power { background: #ff3333; }
         .stat-seg.active.hp { background: #00ff00; }
-
         .char-ult { color: #ffd700; font-weight: bold; margin-top: 10px; font-size: 15px; text-shadow: 1px 1px 0 #000; }
         .char-desc { font-size: 12px; color: #ddd; text-align: center; margin-top: 5px; line-height: 1.4; }
-
         .select-footer { padding: 10px; text-align: center; display: flex; justify-content: center; gap: 20px; }
         .btn-action { background: #ffd700; color: #000; font-size: 20px; font-weight: bold; padding: 8px 40px; border-radius: 25px; border: none; cursor: pointer; box-shadow: 0 4px 0 #b38f00; transition: 0.1s; }
         .btn-action:active { transform: translateY(4px); box-shadow: none; }
         .btn-back { background: #666; color: #fff; box-shadow: 0 4px 0 #333; }
 
-        /* ==================== 4. 战斗界面 UI CSS ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
         .top-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 20px 0; width: 100%; }
         .hud-player { width: 42%; display: flex; align-items: center; gap: 10px; }
@@ -94,7 +100,6 @@
         .hud-player.right .bar-energy { background: linear-gradient(to left, #00ccff, #00ffff); margin-left: auto; }
         .timer-box { background: #ffd700; color: #000; font-size: 30px; font-weight: bold; width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid #fff; margin-top: 5px; }
 
-        /* 触屏控制器 */
         #touch-controls { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; justify-content: space-between; align-items: flex-end; padding: 20px; }
         .control-side { display: flex; align-items: flex-end; gap: 20px; pointer-events: auto; }
         .joystick { width: 120px; height: 120px; border-radius: 50%; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.3); position: relative; }
@@ -117,11 +122,13 @@
         
         <!-- 开场动画层 -->
         <div id="intro-screen">
+            <div class="stars"></div>
+            <button class="skip-btn" id="skip-btn">跳过 >>></button>
             <div class="fade-text" id="intro-text">十五网页游戏</div>
             <div class="intro-img-group" id="intro-imgs">
                 <img src="logo1.jpg" alt="Logo" onerror="this.style.display='none'">
                 <img src="logo2.jpg" alt="鲸鱼" onerror="this.style.display='none'">
-                <div class="intro-credit">本网页代码由deepseek辅助制作</div>
+                <div class="intro-credit">本网页代码由DeepSeek辅助制作</div>
             </div>
         </div>
 
@@ -129,20 +136,17 @@
         <div id="menu-screen">
             <div class="menu-title">十五游戏大厅</div>
             <div class="menu-grid">
-                <!-- 十五格斗 -->
                 <div class="menu-card active" onclick="App.openGame('fighting')">
                     <div class="card-icon">🥊</div>
                     <div class="card-title">十五格斗</div>
                     <div class="card-desc">双人同屏对战<br>绿幕抠图引擎</div>
                 </div>
-                <!-- 十五消消乐 -->
                 <div class="menu-card locked">
                     <div class="lock-icon">🔒</div>
                     <div class="card-icon">🍬</div>
                     <div class="card-title">十五消消乐</div>
                     <div class="card-desc">敬请期待</div>
                 </div>
-                <!-- 十五斗地主 -->
                 <div class="menu-card locked">
                     <div class="lock-icon">🔒</div>
                     <div class="card-icon">🃏</div>
@@ -212,7 +216,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v2.0</p>
+                <p>测试版 v2.1</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -249,44 +253,57 @@
 
     <script>
         // ==========================================
-        // 流程控制与动画 App
+        // 流程控制与开场动画 App
         // ==========================================
         const App = {
+            introTimers: [],
+            
             init() {
-                // 1. 显示“十五网页游戏”
+                // 趁早开始加载图片
+                preloadAssets();
+
                 const introText = document.getElementById('intro-text');
-                introText.style.opacity = 1;
+                const introImgs = document.getElementById('intro-imgs');
+                const skipBtn = document.getElementById('skip-btn');
+
+                // 跳过逻辑
+                skipBtn.onclick = () => {
+                    this.introTimers.forEach(clearTimeout);
+                    this.enterMenu();
+                };
+
+                // 1. 显示“十五网页游戏”
+                introText.classList.add('show');
                 
-                setTimeout(() => {
-                    // 2. 文字慢慢隐藏
-                    introText.style.opacity = 0;
+                // 2. 文字慢慢隐藏
+                this.introTimers.push(setTimeout(() => {
+                    introText.classList.remove('show');
                     
-                    setTimeout(() => {
-                        // 3. 显示图片和致谢
-                        const introImgs = document.getElementById('intro-imgs');
+                    // 3. 显示图片和致谢
+                    this.introTimers.push(setTimeout(() => {
                         introImgs.style.display = 'flex';
-                        // 强制重绘
                         void introImgs.offsetWidth; 
-                        introImgs.style.opacity = 1;
+                        introImgs.classList.add('show');
                         
-                        setTimeout(() => {
-                            // 4. 图片淡出
-                            introImgs.style.opacity = 0;
+                        // 4. 图片淡出
+                        this.introTimers.push(setTimeout(() => {
+                            introImgs.classList.remove('show');
                             
-                            setTimeout(() => {
-                                // 5. 进入主菜单
-                                document.getElementById('intro-screen').style.display = 'none';
-                                const menu = document.getElementById('menu-screen');
-                                menu.style.display = 'flex';
-                                void menu.offsetWidth;
-                                menu.style.opacity = 1;
-                                
-                                // 开启图片后台静默加载，不卡界面
-                                preloadAssets();
-                            }, 1500);
-                        }, 3000); // 图片停留 3 秒
-                    }, 1500); // 文字淡出等待
-                }, 2000); // 文字停留 2 秒
+                            // 5. 进入主菜单
+                            this.introTimers.push(setTimeout(() => {
+                                this.enterMenu();
+                            }, 1500));
+                        }, 4000)); // 图片停留 4 秒
+                    }, 1500));
+                }, 2500)); // 文字停留 2.5 秒
+            },
+
+            enterMenu() {
+                document.getElementById('intro-screen').style.display = 'none';
+                const menu = document.getElementById('menu-screen');
+                menu.style.display = 'flex';
+                void menu.offsetWidth;
+                menu.style.opacity = 1;
             },
 
             openGame(gameName) {
@@ -308,14 +325,14 @@
                 menu.style.display = 'flex';
                 void menu.offsetWidth;
                 menu.style.opacity = 1;
-                Game.isRunning = false; // 停止游戏逻辑
+                Game.isRunning = false; 
             }
         };
 
         // ==========================================
-        // 游戏核心逻辑 (按需加载资源)
+        // 游戏核心逻辑
         // ==========================================
-        const GAME_VERSION = "v2.0";
+        const GAME_VERSION = "v2.1";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -329,7 +346,6 @@
 
         const Assets = { images: {}, loaded: 0, total: 0 };
         
-        // 绿幕抠像引擎
         function chromaKeyGreenScreen(img) {
             const cvs = document.createElement('canvas');
             cvs.width = img.naturalWidth; cvs.height = img.naturalHeight;
@@ -362,7 +378,6 @@
             });
         }
 
-        // 输入控制
         const Input = {
             keys: {},
             init() {
@@ -549,7 +564,7 @@
             updateShowcases() {
                 const c1 = CHARACTERS[this.p1Index];
                 document.getElementById('p1-name-badge').innerText = c1.name; document.getElementById('p1-name-badge').style.background = c1.color;
-                document.getElementById('p1-img-box').innerHTML = `<img src="${c1.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c1.color}'">`; // 选人界面用原图
+                document.getElementById('p1-img-box').innerHTML = `<img src="${c1.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c1.color}'">`;
                 document.getElementById('p1-stats').innerHTML = this.getStatsHTML(c1); document.getElementById('p1-ult-text').innerText = `必杀「${c1.ultName}」`; document.getElementById('p1-desc').innerText = c1.desc;
                 
                 const c2 = CHARACTERS[this.p2Index];
@@ -586,4 +601,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+</html>
