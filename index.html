@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v2.1</title>
+    <title>十五网页游戏大厅 - v2.2</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -12,30 +12,30 @@
         canvas { width: 100%; height: 100%; display: block; }
 
         /* ==================== 1. 开场动画 CSS ==================== */
-        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; }
-        
-        /* 动态星空背景 */
+        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
+        #intro-screen.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
         @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
 
-        .fade-text { font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; transform: scale(0.9); }
+        .fade-text { font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; transform: scale(0.9); position: absolute; }
         .fade-text.show { opacity: 1; transform: scale(1); }
         
-        .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease-in-out; width: 100%; height: 100%; padding: 20px; }
-        .intro-img-group.show { opacity: 1; }
+        .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 1.5s ease-in-out, transform 1.5s; width: 100%; height: 100%; padding: 20px; transform: translateY(20px); }
+        .intro-img-group.show { opacity: 1; transform: translateY(0); }
         
         .intro-img-group img { max-width: 80%; max-height: 35vh; margin-bottom: 10px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite; }
-        
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
 
         .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
 
-        /* 跳过按钮 */
         .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; z-index: 210; transition: 0.3s; backdrop-filter: blur(5px); }
         .skip-btn:hover { background: rgba(255,255,255,0.3); }
 
         /* ==================== 2. 游戏大厅主菜单 CSS ==================== */
-        #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1f1c2c, #4b1b73); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 150; opacity: 0; transition: opacity 1s; }
+        #menu-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1f1c2c, #4b1b73); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 150; opacity: 0; transform: scale(0.95); transition: opacity 1s ease-out, transform 1s ease-out; }
+        #menu-screen.show { opacity: 1; transform: scale(1); }
+
         .menu-title { font-size: 5vw; font-weight: bold; color: #ffd700; margin-bottom: 40px; text-shadow: 2px 2px 0 #000; letter-spacing: 4px; }
         .menu-grid { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; max-width: 90%; }
         
@@ -51,8 +51,10 @@
         .card-desc { font-size: 14px; color: #aaa; text-align: center; padding: 0 20px; line-height: 1.5; }
         .lock-icon { position: absolute; top: 15px; right: 15px; font-size: 24px; color: #ff4d4d; }
 
-        /* ==================== 3. 选人与战斗 CSS (保持原有逻辑) ==================== */
-        #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.3s; }
+        /* ==================== 3. 选人界面 CSS ==================== */
+        #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.5s ease-out, transform 0.5s ease-out; opacity: 0; transform: translateY(20px); }
+        #select-screen.show { opacity: 1; transform: translateY(0); }
+
         .select-header { text-align: center; padding: 10px 0; }
         .select-header h1 { font-size: 28px; color: #ffd700; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
         .select-main { flex: 1; display: flex; justify-content: space-between; padding: 0 20px; overflow: hidden; }
@@ -82,6 +84,7 @@
         .btn-action:active { transform: translateY(4px); box-shadow: none; }
         .btn-back { background: #666; color: #fff; box-shadow: 0 4px 0 #333; }
 
+        /* ==================== 4. 战斗界面 ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
         .top-hud { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 20px 0; width: 100%; }
         .hud-player { width: 42%; display: flex; align-items: center; gap: 10px; }
@@ -216,7 +219,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v2.1</p>
+                <p>测试版 v2.2</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -253,78 +256,86 @@
 
     <script>
         // ==========================================
-        // 流程控制与开场动画 App
+        // 流程控制与动画 App
         // ==========================================
         const App = {
             introTimers: [],
             
             init() {
-                // 趁早开始加载图片
+                // 极速预加载
                 preloadAssets();
 
                 const introText = document.getElementById('intro-text');
                 const introImgs = document.getElementById('intro-imgs');
                 const skipBtn = document.getElementById('skip-btn');
 
-                // 跳过逻辑
                 skipBtn.onclick = () => {
                     this.introTimers.forEach(clearTimeout);
                     this.enterMenu();
                 };
 
-                // 1. 显示“十五网页游戏”
                 introText.classList.add('show');
                 
-                // 2. 文字慢慢隐藏
                 this.introTimers.push(setTimeout(() => {
                     introText.classList.remove('show');
                     
-                    // 3. 显示图片和致谢
                     this.introTimers.push(setTimeout(() => {
                         introImgs.style.display = 'flex';
                         void introImgs.offsetWidth; 
                         introImgs.classList.add('show');
                         
-                        // 4. 图片淡出
                         this.introTimers.push(setTimeout(() => {
                             introImgs.classList.remove('show');
                             
-                            // 5. 进入主菜单
                             this.introTimers.push(setTimeout(() => {
                                 this.enterMenu();
-                            }, 1500));
-                        }, 4000)); // 图片停留 4 秒
-                    }, 1500));
-                }, 2500)); // 文字停留 2.5 秒
+                            }, 1000));
+                        }, 4000));
+                    }, 1000));
+                }, 2000));
             },
 
             enterMenu() {
-                document.getElementById('intro-screen').style.display = 'none';
-                const menu = document.getElementById('menu-screen');
-                menu.style.display = 'flex';
-                void menu.offsetWidth;
-                menu.style.opacity = 1;
+                const intro = document.getElementById('intro-screen');
+                intro.classList.add('hide');
+                
+                setTimeout(() => {
+                    intro.style.display = 'none';
+                    const menu = document.getElementById('menu-screen');
+                    menu.style.display = 'flex';
+                    void menu.offsetWidth;
+                    menu.classList.add('show');
+                }, 1000); // 等动画播完
             },
 
             openGame(gameName) {
                 if (gameName === 'fighting') {
-                    document.getElementById('menu-screen').style.opacity = 0;
+                    const menu = document.getElementById('menu-screen');
+                    menu.classList.remove('show');
+                    
                     setTimeout(() => {
-                        document.getElementById('menu-screen').style.display = 'none';
-                        document.getElementById('select-screen').style.display = 'flex';
+                        menu.style.display = 'none';
+                        const select = document.getElementById('select-screen');
+                        select.style.display = 'flex';
+                        void select.offsetWidth;
+                        select.classList.add('show');
                         UI.init();
                     }, 500);
                 }
             },
 
             backToMenu() {
-                document.getElementById('select-screen').style.display = 'none';
                 document.getElementById('battle-ui').style.display = 'none';
                 document.getElementById('touch-controls').style.display = 'none';
-                const menu = document.getElementById('menu-screen');
-                menu.style.display = 'flex';
-                void menu.offsetWidth;
-                menu.style.opacity = 1;
+                document.getElementById('select-screen').classList.remove('show');
+                
+                setTimeout(() => {
+                    document.getElementById('select-screen').style.display = 'none';
+                    const menu = document.getElementById('menu-screen');
+                    menu.style.display = 'flex';
+                    void menu.offsetWidth;
+                    menu.classList.add('show');
+                }, 500);
                 Game.isRunning = false; 
             }
         };
@@ -332,7 +343,6 @@
         // ==========================================
         // 游戏核心逻辑
         // ==========================================
-        const GAME_VERSION = "v2.1";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
@@ -346,11 +356,18 @@
 
         const Assets = { images: {}, loaded: 0, total: 0 };
         
+        // 🚀 降采样加速抠图引擎
         function chromaKeyGreenScreen(img) {
             const cvs = document.createElement('canvas');
-            cvs.width = img.naturalWidth; cvs.height = img.naturalHeight;
+            // 【核心优化】限制处理宽度最大为 300px，速度快 10 倍以上
+            const MAX_WIDTH = 300;
+            const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
+            
+            cvs.width = img.naturalWidth * scale;
+            cvs.height = img.naturalHeight * scale;
             const c = cvs.getContext('2d');
-            c.drawImage(img, 0, 0);
+            c.drawImage(img, 0, 0, cvs.width, cvs.height);
+            
             const imgData = c.getImageData(0, 0, cvs.width, cvs.height);
             const data = imgData.data;
             for (let i = 0; i < data.length; i += 4) {
@@ -414,7 +431,9 @@
         class Fighter {
             constructor(isP1, charId) {
                 this.isP1 = isP1; this.config = CHARACTERS.find(c => c.id === charId);
-                this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0; this.width = 100; this.height = 160; this.facing = isP1 ? 1 : -1;
+                this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0; 
+                // 🚀 调整体型：加宽了一点，让打击判定更宽泛
+                this.width = 120; this.height = 160; this.facing = isP1 ? 1 : -1;
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp; this.energy = 0; this.maxEnergy = this.config.ultCost;
                 this.state = STATE.IDLE; this.stateTimer = 0; this.hitstop = 0; this.currentAtk = this.config.atkDmg; this.currentSpeed = this.config.speed; this.currentJump = this.config.jump; 
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0; this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
@@ -462,8 +481,8 @@
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height + this.yOffset, w: this.width, h: this.height }; }
             getHitbox() {
                 if (this.state !== STATE.ATTACK || !this.attackData || this.stateTimer < 5 || this.config.id === 5) return null;
-                if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 150, y: this.y - 150, w: 150, h: 150 };
-                let range = this.attackData.isUlt ? 150 : 120; return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 140, w: range, h: 120 };
+                if (this.config.id === 1 && this.attackData.isUlt) return { x: this.facing === 1 ? this.x : this.x - 160, y: this.y - 160, w: 160, h: 160 };
+                let range = this.attackData.isUlt ? 160 : 130; return { x: this.facing === 1 ? this.x : this.x - range, y: this.y - 140, w: range, h: 120 };
             }
             receiveHit(attacker, attackData, type = "normal") {
                 if (this.state === STATE.DEAD) return;
@@ -486,12 +505,27 @@
                 if (this.state === STATE.ATTACK) { const hit = this.getHitbox(); if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 2; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); } }
             }
             drawBody(x, y, facing, isGhost) {
-                const hurt = this.getHurtbox(); const img = Assets.images[this.config.img_cut];
-                if (img) {
+                const hurt = this.getHurtbox(); 
+                const img = Assets.images[this.config.img_cut];
+                
+                if (img && img.height > 0) {
                     ctx.save(); ctx.translate(x, y);
                     let scaleX = 1, scaleY = 1;
                     if (!isGhost) { if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; } if (this.state === STATE.HIT) { scaleX = 1.2; scaleY = 0.8; } if (this.state === STATE.JUMP) { scaleX = 0.9; scaleY = 1.1; } }
-                    ctx.scale(facing * scaleX, scaleY); ctx.drawImage(img, -hurt.w/2, -hurt.h, hurt.w, hurt.h); ctx.restore();
+                    ctx.scale(facing * scaleX, scaleY); 
+                    
+                    // 🚀 修复变扁：自适应等比缩放
+                    const ratio = img.height / img.width;
+                    let drawW = hurt.w;
+                    let drawH = hurt.w * ratio; 
+                    if (drawH > hurt.h) { // 如果按宽度算太高，则按高度算
+                        drawH = hurt.h;
+                        drawW = hurt.h / ratio;
+                    }
+                    
+                    // 将人物底部对齐脚底，并居中
+                    ctx.drawImage(img, -drawW/2, -drawH, drawW, drawH); 
+                    ctx.restore();
                 } else {
                     ctx.fillStyle = this.config.color; ctx.fillRect(x - hurt.w/2, y - hurt.h, hurt.w, hurt.h);
                 }
@@ -580,11 +614,11 @@
                 return html;
             },
             startGame() {
-                document.getElementById('select-screen').style.opacity = 0;
+                document.getElementById('select-screen').classList.remove('show');
                 setTimeout(() => {
                     document.getElementById('select-screen').style.display = 'none';
                     Game.init(CHARACTERS[this.p1Index].id, CHARACTERS[this.p2Index].id);
-                }, 300);
+                }, 500);
             }
         };
 
@@ -601,4 +635,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
