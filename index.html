@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.3</title>
+    <title>十五网页游戏大厅 - v3.4</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -11,36 +11,42 @@
         #game-container { position: relative; width: 100%; max-width: 1200px; height: 100vh; max-height: 800px; aspect-ratio: 16/9; overflow: hidden; background: #000; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
         canvas { width: 100%; height: 100%; display: block; }
 
-        /* ==================== 1. 开场动画 CSS (纯CSS动画，绝对不卡) ==================== */
-        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; transition: opacity 1.5s ease-in-out, transform 1.5s ease-in-out; }
-        #intro-screen.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+        /* ==================== 1. 开场动画 CSS ==================== */
+        #intro-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, #000 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; overflow: hidden; transition: opacity 1s ease-in-out; }
+        #intro-screen.hide { opacity: 0; pointer-events: none; }
         
         .stars { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 2px), radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 1px); background-size: 100px 100px, 50px 50px; background-position: 0 0, 25px 25px; opacity: 0.3; animation: starMove 20s linear infinite; z-index: -1; }
         @keyframes starMove { from { background-position: 0 0, 25px 25px; } to { background-position: 0 1000px, 25px 1025px; } }
 
-        /* 文字纯CSS动画 */
-        .fade-text { position: absolute; font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; opacity: 0; }
+        /* 文字动画：渐显放大 -> 渐隐缩小 */
+        .fade-text { position: absolute; font-size: 5vw; font-weight: bold; letter-spacing: 8px; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px #00ccff; opacity: 0; transform: scale(0.6); }
         .fade-text.animating { animation: textAnim 4s ease-in-out forwards; }
         @keyframes textAnim {
-            0% { opacity: 0; transform: scale(0.8); }
-            20% { opacity: 1; transform: scale(1); }
-            80% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.1); }
+            0% { opacity: 0; transform: scale(0.6); }
+            20% { opacity: 1; transform: scale(1.1); }
+            70% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0; transform: scale(0.8); }
         }
         
-        /* Logo纯CSS动画 */
+        /* Logo 容器：只负责渐显渐隐 */
         .intro-img-group { display: none; flex-direction: column; align-items: center; justify-content: center; opacity: 0; width: 100%; height: 100%; padding: 20px; }
-        .intro-img-group.animating { animation: imgAnim 6s ease-in-out forwards; }
-        @keyframes imgAnim {
-            0% { opacity: 0; transform: translateY(20px); }
-            15% { opacity: 1; transform: translateY(0); }
-            85% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(-20px); }
+        .intro-img-group.animating { animation: containerAnim 5s ease-in-out forwards; }
+        @keyframes containerAnim {
+            0% { opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
         }
-        
-        .intro-img-group img { max-width: 80%; max-height: 35vh; margin-bottom: 10px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
-        .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; margin-top: 15px; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
+
+        /* Logo 图片：只负责上下浮动 */
+        .intro-img-group img { max-width: 80%; max-height: 30vh; margin-bottom: 15px; border-radius: 15px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: floatAnim 3s ease-in-out infinite; }
+        @keyframes floatAnim { 
+            0% { transform: translateY(0px); } 
+            50% { transform: translateY(-15px); } 
+            100% { transform: translateY(0px); } 
+        }
+
+        .intro-credit { font-size: 4vw; color: #00ffcc; font-weight: bold; text-shadow: 0 0 10px rgba(0,255,204,0.6); letter-spacing: 2px; text-align: center; }
         
         .skip-btn { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.3); padding: 8px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; z-index: 210; transition: 0.3s; backdrop-filter: blur(5px); }
         .skip-btn:hover { background: rgba(255,255,255,0.3); }
@@ -374,10 +380,10 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 十五游戏大厅 v3.3 更新：</h4>
-                    <p>1. **修复了开头文字不见的问题**：现在使用纯 CSS 动画，文字和鲸鱼 Logo 丝滑呈现。</p>
-                    <p>2. **修复了图片加载卡顿**：网页现在**瞬间开启**，不用死等图片下载，图片会在后台自动加载，完全不影响你游玩！</p>
-                    <p>3. **消消乐丝滑滑动**：依然保留了最爽的滑动消除手感。</p>
+                    <h4>🎉 十五游戏大厅 v3.4 更新：</h4>
+                    <p>1. **消消乐逻辑修复**：修复了滑动误触导致莫名加分的 Bug，现在只有真正三连才会得分。</p>
+                    <p>2. **开场文字重制**：现在的文字动画是“从无到有，渐显放大 → 停留 → 渐隐缩小”。</p>
+                    <p>3. **Logo 呼吸浮动**：修复了动画生硬的问题，现在 Logo 会非常平滑地上下浮动。</p>
                 </div>
             </div>
         </div>
@@ -484,7 +490,6 @@
             introTimers: [],
             
             init() {
-                // 图片在后端慢慢加载，绝不阻塞页面
                 setTimeout(preloadAssets, 100);
                 SaveData.updateDisplay();
 
@@ -492,16 +497,16 @@
                 const introImgs = document.getElementById('intro-imgs');
                 const skipBtn = document.getElementById('skip-btn');
 
-                // 纯 CSS 动画控制
                 introText.classList.add('animating');
                 
-                // 3.5秒后文字消失，图片出现
+                // 文字 4s 动画后，图片开始
                 this.introTimers.push(setTimeout(() => {
+                    introText.style.display = 'none';
                     introImgs.style.display = 'flex';
                     introImgs.classList.add('animating');
-                }, 3500));
+                }, 4000));
 
-                // 9秒后自动进入主菜单（或者用户点击跳过）
+                // 图片 5s 动画后，自动进入主菜单
                 this.introTimers.push(setTimeout(() => {
                     this.enterMenu();
                 }, 9000));
@@ -514,7 +519,7 @@
             },
 
             enterMenu() {
-                this.introTimers.forEach(clearTimeout); // 清除剩余计时器防止冲突
+                this.introTimers.forEach(clearTimeout);
                 const intro = document.getElementById('intro-screen');
                 intro.classList.add('hide');
                 setTimeout(() => {
@@ -584,7 +589,7 @@
         };
 
         // ==========================================
-        // 资源加载与绿幕抠图 (极速防卡死版)
+        // 资源加载与绿幕抠图
         // ==========================================
         const Assets = { images: {}, loaded: 0, total: 0 };
         
@@ -599,7 +604,7 @@
         function chromaKeyGreenScreen(img) {
             try {
                 const cvs = document.createElement('canvas');
-                const MAX_WIDTH = 200; // 降采样
+                const MAX_WIDTH = 200;
                 const scale = Math.min(1, MAX_WIDTH / img.naturalWidth);
                 cvs.width = img.naturalWidth * scale; 
                 cvs.height = img.naturalHeight * scale;
@@ -610,16 +615,12 @@
                 const data = imgData.data;
                 for (let i = 0; i < data.length; i += 4) {
                     let r = data[i], g = data[i+1], b = data[i+2];
-                    // 绿幕特征抠图
                     if (g > r * 1.15 && g > b * 1.15 && g > 40) { data[i+3] = 0; }
                     else if (g > r * 1.05 && g > b * 1.05) { data[i+3] = 128; }
                 }
                 c.putImageData(imgData, 0, 0);
                 return cvs; 
-            } catch (e) {
-                console.warn("抠图失败，可能由于跨域限制，转为普通图片", e);
-                return img;
-            }
+            } catch (e) { return img; }
         }
 
         function preloadAssets() {
@@ -631,16 +632,11 @@
                 let img = new Image();
                 img.src = url;
                 img.onload = () => {
-                    // 使用 requestIdleCallback 或 setTimeout 保证在浏览器空闲时处理
                     (window.requestIdleCallback || setTimeout)(() => {
-                        if (url.endsWith('.png')) {
-                            Assets.images[url] = chromaKeyGreenScreen(img);
-                        } else {
-                            Assets.images[url] = img;
-                        }
+                        if (url.endsWith('.png')) Assets.images[url] = chromaKeyGreenScreen(img);
+                        else Assets.images[url] = img;
                     });
                 };
-                img.onerror = () => {};
             });
         }
 
@@ -938,6 +934,7 @@
             
             pointerStart: { x: 0, y: 0 },
             activeTile: null, 
+            isLocked: false, // 防抖锁，防止滑动过快触发多次交换
 
             init() {
                 this.canvas = document.getElementById('m3Canvas');
@@ -950,6 +947,7 @@
                 this.isRunning = true;
                 this.state = 'IDLE';
                 this.particles = [];
+                this.isLocked = false;
                 
                 this.generateGrid();
                 
@@ -999,7 +997,7 @@
             },
 
             onPointerDown(e) {
-                if (!this.isRunning || this.state !== 'IDLE') return;
+                if (!this.isRunning || this.state !== 'IDLE' || this.isLocked) return;
                 const pos = this.getPos(e);
                 if (pos.r < 0 || pos.r >= this.size || pos.c < 0 || pos.c >= this.size) return;
                 
@@ -1009,11 +1007,11 @@
             },
 
             onPointerMove(e) {
-                if (!this.isRunning || this.state !== 'IDLE' || !this.activeTile) return;
+                if (!this.isRunning || this.state !== 'IDLE' || this.isLocked || !this.activeTile) return;
                 
                 let dx = e.clientX - this.pointerStart.x;
                 let dy = e.clientY - this.pointerStart.y;
-                let threshold = 20; 
+                let threshold = 25; // 稍微提高阈值，防误触
 
                 if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
                     let targetR = this.activeTile.r;
@@ -1026,6 +1024,7 @@
                     }
 
                     if (targetR >= 0 && targetR < this.size && targetC >= 0 && targetC < this.size) {
+                        this.isLocked = true; // 锁住
                         this.swapTiles({r: this.activeTile.r, c: this.activeTile.c}, {r: targetR, c: targetC});
                         this.activeTile = null; 
                     }
@@ -1050,7 +1049,7 @@
                 t2.targetX = p1.c * this.tileSize; t2.targetY = p1.r * this.tileSize;
 
                 this.animData = { p1, p2, t1, t2 };
-                this.animTimer = 10; 
+                this.animTimer = 12; 
             },
 
             checkMatches() {
@@ -1177,11 +1176,13 @@
                                 this.combo = 0;
                                 this.processClear(matches);
                             } else {
+                                // 没匹配，换回原位
                                 let {p1, p2, t1, t2} = this.animData;
                                 this.grid[p1.r][p1.c] = t1; this.grid[p2.r][p2.c] = t2;
                                 t1.targetX = p1.c * this.tileSize; t1.targetY = p1.r * this.tileSize;
                                 t2.targetX = p2.c * this.tileSize; t2.targetY = p2.r * this.tileSize;
                                 this.state = 'IDLE';
+                                this.isLocked = false; // 解锁
                                 AudioEngine.error();
                             }
                         } else if (this.state === 'CLEARING') {
@@ -1192,6 +1193,7 @@
                                 this.processClear(matches);
                             } else {
                                 this.state = 'IDLE';
+                                this.isLocked = false; // 解锁
                                 this.checkDeadlock();
                             }
                         }
@@ -1319,4 +1321,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                                                                                       </html>
