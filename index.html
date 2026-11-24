@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.0</title>
+    <title>十五网页游戏大厅 - v3.1</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -39,7 +39,7 @@
         .win-record { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #ffd700; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #ffd700; font-weight: bold; z-index: 10; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
 
         .menu-title { position: relative; z-index: 2; font-size: 4vw; font-weight: bold; color: #fff; margin-bottom: 10px; margin-top: -30px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
-        .menu-subtitle { position: relative; z-index: 2; font-size: 1.2vw; color: #00ffcc; margin-bottom: 40px; letter-spacing: 4px; cursor: pointer; } /* 隐藏彩蛋：点这个10次 */
+        .menu-subtitle { position: relative; z-index: 2; font-size: 1.2vw; color: #00ffcc; margin-bottom: 40px; letter-spacing: 4px; cursor: pointer; }
         
         .menu-grid { position: relative; z-index: 2; display: flex; gap: 20px; align-items: center; justify-content: center; max-width: 95%; }
         
@@ -73,8 +73,9 @@
         .modal-title { font-size: 20px; font-weight: bold; color: #00ffcc; }
         .modal-close { background: none; border: none; color: #aaa; font-size: 24px; cursor: pointer; transition: 0.2s; }
         .modal-close:hover { color: #fff; transform: scale(1.1); }
-        .modal-content { padding: 20px; overflow-y: auto; color: #ddd; line-height: 1.6; font-size: 14px; }
+        .modal-content { padding: 20px; overflow-y: auto; color: #ddd; line-height: 1.6; font-size: 15px; }
         .modal-content h4 { color: #ffd700; margin-top: 15px; margin-bottom: 5px; font-size: 16px; }
+        .modal-content p { margin-bottom: 10px; }
 
         /* ==================== 4. 选人界面 CSS ==================== */
         #select-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #2b1b54, #4b1b73); display: none; flex-direction: column; color: white; z-index: 100; transition: opacity 0.5s ease-out, transform 0.5s ease-out; opacity: 0; transform: translateY(20px); }
@@ -165,12 +166,18 @@
         /* ==================== 6. 十五消消乐 CSS ==================== */
         #match3-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #2b1b54, #0f0c29); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 120; opacity: 0; transition: opacity 0.3s; }
         #match3-screen.show { opacity: 1; }
-        .m3-header { display: flex; justify-content: space-between; width: 80%; max-width: 500px; margin-bottom: 20px; align-items: center; }
-        .m3-score { font-size: 24px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .m3-back { background: #666; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        .m3-canvas-box { background: rgba(0,0,0,0.6); border: 2px solid #00ffcc; border-radius: 15px; padding: 10px; box-shadow: 0 0 30px rgba(0,255,204,0.3); }
-        /* 适应移动端缩小画布 */
-        #m3Canvas { width: 100%; max-width: 480px; aspect-ratio: 1/1; display: block; touch-action: none; }
+        .m3-topbar { display: flex; justify-content: space-between; width: 90%; max-width: 480px; margin-bottom: 10px; align-items: center; }
+        .m3-score { font-size: 28px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .m3-back { background: #666; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 16px; }
+        
+        /* 玩法提示 */
+        .m3-tips { color: #00ffcc; font-size: 14px; margin-bottom: 15px; font-weight: bold; text-align: center; background: rgba(0, 255, 204, 0.1); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 255, 204, 0.3); }
+
+        .m3-canvas-box { background: rgba(0,0,0,0.6); border: 3px solid #00ffcc; border-radius: 15px; padding: 5px; box-shadow: 0 0 30px rgba(0,255,204,0.3); position: relative; }
+        #m3Canvas { width: 90vw; max-width: 460px; aspect-ratio: 1/1; display: block; touch-action: none; }
+        
+        /* Combo 飘字 */
+        .combo-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; }
     </style>
 </head>
 <body>
@@ -202,13 +209,13 @@
                 <div class="menu-card active" onclick="App.openGame('fighting')">
                     <div class="card-icon">🥊</div>
                     <div class="card-title">十五格斗</div>
-                    <div class="card-desc">双人同屏对战<br>绿幕实时抠图引擎</div>
+                    <div class="card-desc">双人同屏对战<br>操作爽快，拳拳到肉</div>
                 </div>
                 <!-- 十五消消乐 (已解锁) -->
                 <div class="menu-card active" onclick="App.openGame('match3')">
                     <div class="card-icon">🍬</div>
                     <div class="card-title">十五消消乐</div>
-                    <div class="card-desc">经典三消玩法<br>全角色方块乱斗</div>
+                    <div class="card-desc">超爽快三消玩法<br>魔性消除根本停不下来</div>
                 </div>
                 <!-- 十五斗地主 (未解锁) -->
                 <div class="menu-card locked">
@@ -301,7 +308,6 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v3.0</p>
             </div>
             <div class="select-main">
                 <div class="player-panel p1-active">
@@ -337,12 +343,14 @@
 
         <!-- 十五消消乐界面 -->
         <div id="match3-screen">
-            <div class="m3-header">
+            <div class="m3-topbar">
                 <button class="m3-back" onclick="App.backToMenu()">返回大厅</button>
                 <div class="m3-score">得分: <span id="m3-score-text">0</span></div>
             </div>
+            <div class="m3-tips">👇 点击相邻头像交换，凑齐三个即可消除！</div>
             <div class="m3-canvas-box">
                 <canvas id="m3Canvas" width="480" height="480"></canvas>
+                <div class="combo-text" id="combo-text">Combo x2!</div>
             </div>
         </div>
 
@@ -351,12 +359,11 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 v3.0 核弹级更新：</h4>
-                    <p>1. **十五消消乐上线**：用 5 位主角头像玩三消！</p>
-                    <p>2. **全局音效实装**：代码实时合成电子音效，打击感爆棚！</p>
-                    <p>3. **战绩系统**：记录 P1 与 P2 的胜场，决出真正的霸主。</p>
-                    <p>4. **隐藏彩蛋**：主页“CYBER GAME STATION”藏有惊喜。</p>
-                    <p>5. **动态战斗背景**：加入了流光网格，告别死板黑屏。</p>
+                    <h4>🎉 十五游戏大厅 v3.1 更新：</h4>
+                    <p>1. **全新消消乐**：加了丝滑的动画特效，和明确的新手提示，快来试玩！</p>
+                    <p>2. **说明优化**：把那些看不懂的“代码说明”全删了，换成了大白话。</p>
+                    <p>3. **战绩系统**：打完架别忘了看看大厅右上角的战绩，看看谁是家里的格斗王。</p>
+                    <p>4. **隐藏彩蛋**：大厅的“CYBER GAME STATION”是可以点的，点十次有惊喜哦。</p>
                 </div>
             </div>
         </div>
@@ -364,12 +371,17 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">❓ 常见问题解答</div><button class="modal-close" onclick="closeModal('modal-faq')">×</button></div>
                 <div class="modal-content">
-                    <h4>Q1: 怎么在同一个设备上双人对战？</h4>
-                    <p>A: **电脑端**：P1 使用 W/A/S/D 移动，J 普攻，K 必杀；P2 使用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机/平板**：屏幕左右两侧会自动出现对应的虚拟按键。</p>
-                    <h4>Q2: 为什么战斗里角色变成了彩色方块？</h4>
-                    <p>A: 这通常是因为图片还在后台下载或抠图。稍等片刻即可自动恢复。如果一直不显示，请检查你上传的图片文件名是否严格为 `char1.png` ~ `char5.png`。</p>
-                    <h4>Q3: 隐藏彩蛋怎么触发？</h4>
-                    <p>A: 回到大厅，狂点标题下方的那行英文小字“CYBER GAME STATION”试试看！</p>
+                    <h4>Q1: 格斗游戏怎么放技能啊？</h4>
+                    <p>A: **电脑上**：左边玩家用 W、A、S、D 移动，J 是普攻，K 是大招（必须等底下的能量条亮了才能放）；右边玩家用 方向键 移动，小键盘 1 普攻，2 放大招。<br>**手机上**：屏幕左下角和右下角会直接长出虚拟按键，搓就完事了！</p>
+                    
+                    <h4>Q2: 为啥打格斗的时候人物像个方块？</h4>
+                    <p>A: 那是人物照片还没加载完。因为要把绿幕背景抠掉，需要几秒钟时间。你稍微等一下，或者多滑两下屏幕，图像马上就出来了。</p>
+                    
+                    <h4>Q3: 消消乐怎么玩？没看懂啊！</h4>
+                    <p>A: 很简单！你看上面的图块，比如有两个“辣子鸡”在挨着，你点一下其中一个，再点一下旁边另一个，它们就会互换位置。只要横着或竖着连成三个一模一样的头像，就能消除得分啦！</p>
+                    
+                    <h4>Q4: 游戏卡住了或者选错人怎么办？</h4>
+                    <p>A: 别慌，格斗界面中间有个“退出”按钮，消消乐左上角有个“返回大厅”按钮。点一下就能重开，如果还是卡，直接刷新一下网页就行。</p>
                 </div>
             </div>
         </div>
@@ -426,20 +438,17 @@
             }
         };
 
-        // 隐藏彩蛋逻辑
         let secretClickCount = 0;
         document.getElementById('secret-trigger').addEventListener('click', () => {
-            secretClickCount++;
-            AudioEngine.click();
+            secretClickCount++; AudioEngine.click();
             if (secretClickCount >= 10 && !SaveData.secretUnlocked) {
                 SaveData.secretUnlocked = true;
                 localStorage.setItem('secretUnlocked', 'true');
                 alert('👑 彩蛋触发！真·十五 已加入选人池！');
-                // 动态将隐藏角色加入到 CHARACTERS 池中
                 CHARACTERS.push({
                     id: 999, name: "真·十五", type: "神", color: "#ffffff", img: "logo1.jpg", img_cut: "logo1.jpg", 
                     stats: { power: 6, speed: 6, hp: 6 }, ultName: "降维打击", 
-                    desc: "【定位】开发者神级角色。\n【被动】全属性碾压。\n【大招】降维打击：全屏秒杀。", 
+                    desc: "【定位】开发者神级角色。\n【大招】降维打击：全屏秒杀。", 
                     maxHp: 999, speed: 500, jump: -1200, atkDmg: 100, ultCost: 10
                 });
             }
@@ -689,10 +698,7 @@
                         case 3: Game.triggerGlobalStun(this); this.stateTimer = 40; this.vx = 0; break;
                         case 4: Game.projectiles.push(new Projectile(this.x, this.y - 100, this.facing * 900, this, 'halberd')); this.stateTimer = 40; this.vx = 0; break;
                         case 5: this.stateTimer = 35; this.vx = 0; break;
-                        case 999: // 真·十五 全屏秒杀
-                            const target = this.isP1 ? Game.p2 : Game.p1;
-                            target.hp = 0; target.changeState(STATE.DEAD);
-                            this.stateTimer = 60; this.vx = 0; break;
+                        case 999: const target = this.isP1 ? Game.p2 : Game.p1; target.hp = 0; target.changeState(STATE.DEAD); this.stateTimer = 60; this.vx = 0; break;
                     }
                 } else { this.stateTimer = 15; this.vx = 0; }
             }
@@ -805,7 +811,6 @@
                     else if (this.p2.hp > this.p1.hp) { winner = "时间到！2P 胜利!"; SaveData.addWin(2); }
                     else winner = "时间到！平局!";
                 }
-                
                 document.getElementById('result-text').innerText = winner;
                 document.getElementById('result-overlay').style.display = 'flex';
             },
@@ -818,11 +823,9 @@
                 ctx.save();
                 if (this.shakeTimer > 0) { let dx = (Math.random() - 0.5) * this.shakeTimer * 2.5; let dy = (Math.random() - 0.5) * this.shakeTimer * 2.5; ctx.translate(dx, dy); }
                 
-                // 动态赛博背景
                 let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height); bgGrad.addColorStop(0, '#0f0c29'); bgGrad.addColorStop(0.5, '#302b63'); bgGrad.addColorStop(1, '#24243e'); 
                 ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // 霓虹网格线
                 ctx.strokeStyle = 'rgba(0, 255, 204, 0.1)'; ctx.lineWidth = 2;
                 for(let i=0; i<canvas.width; i+=80) { ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 550); ctx.stroke(); }
                 let offsetY = this.bgOffset % 80;
@@ -890,28 +893,35 @@
         };
 
         // ==========================================
-        // 十五消消乐核心逻辑 (Match3Game)
+        // 十五消消乐核心逻辑 (全新丝滑版)
         // ==========================================
         const Match3Game = {
             isRunning: false,
             canvas: null, ctx: null,
-            size: 8, tileSize: 60,
-            grid: [],
+            size: 8, tileSize: 55, offsetX: 20, offsetY: 20, // 留白调整
+            grid: [], // 存放对象 { id, x, y, targetX, targetY, scale, alpha }
             selected: null,
             score: 0,
-            animState: 'IDLE', // IDLE, SWAPPING, CLEARING, FALLING
+            state: 'IDLE', // IDLE, SWAPPING, CLEARING, FALLING
             animTimer: 0,
             animData: null,
+            combo: 0,
 
             init() {
                 this.canvas = document.getElementById('m3Canvas');
                 this.ctx = this.canvas.getContext('2d');
-                this.score = 0;
+                this.size = 8;
+                // 适配画布大小
+                this.tileSize = 480 / this.size; 
+                this.offsetX = 0; this.offsetY = 0;
+
+                this.score = 0; this.combo = 0;
                 document.getElementById('m3-score-text').innerText = this.score;
                 this.isRunning = true;
-                this.generateGrid();
+                this.selected = null;
+                this.state = 'IDLE';
                 
-                // 绑定点击事件
+                this.generateGrid();
                 this.canvas.addEventListener('pointerdown', (e) => this.handleClick(e));
             },
 
@@ -922,28 +932,39 @@
                     for (let c = 0; c < this.size; c++) {
                         let charId;
                         do {
-                            charId = Math.floor(Math.random() * 5) + 1; // 1-5
+                            charId = Math.floor(Math.random() * 5) + 1; // 1-5 对应 5 个角色
                         } while (
-                            (c >= 2 && row[c-1] === charId && row[c-2] === charId) || // 横向三连
-                            (r >= 2 && this.grid[r-1][c] === charId && this.grid[r-2][c] === charId) // 纵向三连
+                            (c >= 2 && row[c-1].id === charId && row[c-2].id === charId) || 
+                            (r >= 2 && this.grid[r-1][c].id === charId && this.grid[r-2][c].id === charId)
                         );
-                        row.push(charId);
+                        row.push(this.createTile(charId, r, c));
                     }
                     this.grid.push(row);
                 }
             },
 
+            createTile(id, r, c) {
+                return {
+                    id: id,
+                    x: c * this.tileSize,
+                    y: r * this.tileSize,
+                    targetX: c * this.tileSize,
+                    targetY: r * this.tileSize,
+                    scale: 1,
+                    alpha: 1
+                };
+            },
+
             handleClick(e) {
-                if (!this.isRunning || this.animState !== 'IDLE') return;
+                if (!this.isRunning || this.state !== 'IDLE') return;
                 const rect = this.canvas.getBoundingClientRect();
-                // 坐标映射，处理 CSS 缩放
                 const scaleX = this.canvas.width / rect.width;
                 const scaleY = this.canvas.height / rect.height;
-                const x = (e.clientX - rect.left) * scaleX;
-                const y = (e.clientY - rect.top) * scaleY;
+                const clickX = (e.clientX - rect.left) * scaleX;
+                const clickY = (e.clientY - rect.top) * scaleY;
                 
-                const c = Math.floor(x / this.tileSize);
-                const r = Math.floor(y / this.tileSize);
+                const c = Math.floor(clickX / this.tileSize);
+                const r = Math.floor(clickY / this.tileSize);
                 if (r < 0 || r >= this.size || c < 0 || c >= this.size) return;
 
                 AudioEngine.click();
@@ -952,50 +973,52 @@
                     this.selected = { r, c };
                 } else {
                     const prev = this.selected;
-                    // 如果点的是自己，取消选中
                     if (prev.r === r && prev.c === c) {
                         this.selected = null;
-                    } 
-                    // 如果相邻，尝试交换
-                    else if (Math.abs(prev.r - r) + Math.abs(prev.c - c) === 1) {
-                        this.swap(prev, { r, c });
+                    } else if (Math.abs(prev.r - r) + Math.abs(prev.c - c) === 1) {
+                        // 相邻，交换
                         this.selected = null;
-                    } 
-                    // 如果不相邻，选中新的
-                    else {
+                        this.swapTiles(prev, { r, c });
+                    } else {
                         this.selected = { r, c };
                     }
                 }
             },
 
-            swap(p1, p2) {
-                this.animState = 'SWAPPING';
-                this.animTimer = 10; // 延迟动画
-                this.animData = { p1, p2 };
-                // 数据层面先交换
-                let temp = this.grid[p1.r][p1.c];
-                this.grid[p1.r][p1.c] = this.grid[p2.r][p2.c];
-                this.grid[p2.r][p2.c] = temp;
+            swapTiles(p1, p2) {
+                this.state = 'SWAPPING';
+                let t1 = this.grid[p1.r][p1.c];
+                let t2 = this.grid[p2.r][p2.c];
+                
+                // 交换数据层
+                this.grid[p1.r][p1.c] = t2;
+                this.grid[p2.r][p2.c] = t1;
+
+                // 设置动画目标
+                t1.targetX = p2.c * this.tileSize;
+                t1.targetY = p2.r * this.tileSize;
+                t2.targetX = p1.c * this.tileSize;
+                t2.targetY = p1.r * this.tileSize;
+
+                this.animData = { p1, p2, t1, t2 };
             },
 
             checkMatches() {
                 let toClear = new Set();
-                // 横向检测
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size - 2; c++) {
-                        let val = this.grid[r][c];
+                        let val = this.grid[r][c].id;
                         if (val === 0) continue;
-                        if (val === this.grid[r][c+1] && val === this.grid[r][c+2]) {
+                        if (val === this.grid[r][c+1].id && val === this.grid[r][c+2].id) {
                             toClear.add(`${r},${c}`); toClear.add(`${r},${c+1}`); toClear.add(`${r},${c+2}`);
                         }
                     }
                 }
-                // 纵向检测
                 for (let c = 0; c < this.size; c++) {
                     for (let r = 0; r < this.size - 2; r++) {
-                        let val = this.grid[r][c];
+                        let val = this.grid[r][c].id;
                         if (val === 0) continue;
-                        if (val === this.grid[r+1][c] && val === this.grid[r+2][c]) {
+                        if (val === this.grid[r+1][c].id && val === this.grid[r+2][c].id) {
                             toClear.add(`${r},${c}`); toClear.add(`${r+1},${c}`); toClear.add(`${r+2},${c}`);
                         }
                     }
@@ -1004,99 +1027,107 @@
             },
 
             processClear(matches) {
-                if (matches.size === 0) {
-                    this.animState = 'IDLE';
-                    this.checkDeadlock(); // 检查死局
-                    return;
-                }
-                
+                this.combo++;
                 AudioEngine.match();
-                this.score += matches.size * 10;
+                
+                // 连击飘字
+                if (this.combo > 1) {
+                    const comboEl = document.getElementById('combo-text');
+                    comboEl.innerText = `Combo x${this.combo}!`;
+                    comboEl.style.opacity = 1;
+                    comboEl.style.transform = 'translate(-50%, -80%) scale(1.2)';
+                    setTimeout(() => {
+                        comboEl.style.opacity = 0;
+                        comboEl.style.transform = 'translate(-50%, -50%) scale(1)';
+                    }, 500);
+                }
+
+                this.score += matches.size * 10 * this.combo;
                 document.getElementById('m3-score-text').innerText = this.score;
 
                 matches.forEach(pos => {
                     let [r, c] = pos.split(',').map(Number);
-                    this.grid[r][c] = 0; // 标记为空
+                    this.grid[r][c].alpha = 0; // 淡出动画
                 });
                 
-                this.animState = 'CLEARING';
-                this.animTimer = 15; // 消除停顿
+                this.state = 'CLEARING';
+                this.animTimer = 15; 
             },
 
             applyGravity() {
+                let dropped = false;
                 for (let c = 0; c < this.size; c++) {
                     let emptySpace = 0;
                     for (let r = this.size - 1; r >= 0; r--) {
-                        if (this.grid[r][c] === 0) {
+                        if (this.grid[r][c].alpha === 0) {
                             emptySpace++;
                         } else if (emptySpace > 0) {
                             // 下落
                             this.grid[r + emptySpace][c] = this.grid[r][c];
-                            this.grid[r][c] = 0;
+                            this.grid[r][c] = this.createTile(0, r, c);
+                            this.grid[r + emptySpace][c].targetY = (r + emptySpace) * this.tileSize;
+                            dropped = true;
                         }
                     }
-                    // 顶部填充新方块
+                    // 填充新方块
                     for (let r = 0; r < emptySpace; r++) {
-                        this.grid[r][c] = Math.floor(Math.random() * 5) + 1;
+                        let newId = Math.floor(Math.random() * 5) + 1;
+                        let newTile = this.createTile(newId, r, c);
+                        newTile.y = -1 * this.tileSize * (emptySpace - r); // 从屏幕上方掉下来
+                        this.grid[r][c] = newTile;
+                        dropped = true;
                     }
                 }
-                this.animState = 'FALLING';
-                this.animTimer = 15;
-            },
-
-            checkDeadlock() {
-                // 简单检测：遍历所有格子，尝试虚拟交换，看是否能消除
-                for (let r = 0; r < this.size; r++) {
-                    for (let c = 0; c < this.size; c++) {
-                        // 尝试向右换
-                        if (c < this.size - 1) {
-                            this.doVirtualSwap(r, c, r, c + 1);
-                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r, c + 1); return; }
-                            this.doVirtualSwap(r, c, r, c + 1);
-                        }
-                        // 尝试向下换
-                        if (r < this.size - 1) {
-                            this.doVirtualSwap(r, c, r + 1, c);
-                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r + 1, c); return; }
-                            this.doVirtualSwap(r, c, r + 1, c);
-                        }
-                    }
-                }
-                // 死局，洗牌
-                console.log("死局，洗牌");
-                this.generateGrid();
-            },
-
-            doVirtualSwap(r1, c1, r2, c2) {
-                let temp = this.grid[r1][c1];
-                this.grid[r1][c1] = this.grid[r2][c2];
-                this.grid[r2][c2] = temp;
+                this.state = 'FALLING';
+                this.animTimer = 20;
             },
 
             update() {
                 if (!this.isRunning) return;
+
+                // 1. 更新所有方块的动画坐标
+                let isAnimating = false;
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        let tile = this.grid[r][c];
+                        if (!tile || tile.id === 0) continue;
+                        // 平滑移动
+                        if (Math.abs(tile.x - tile.targetX) > 1 || Math.abs(tile.y - tile.targetY) > 1) {
+                            tile.x += (tile.targetX - tile.x) * 0.3;
+                            tile.y += (tile.targetY - tile.y) * 0.3;
+                            isAnimating = true;
+                        } else {
+                            tile.x = tile.targetX; tile.y = tile.targetY;
+                        }
+                    }
+                }
+
+                // 2. 状态机流转
                 if (this.animTimer > 0) {
                     this.animTimer--;
                     if (this.animTimer === 0) {
-                        if (this.animState === 'SWAPPING') {
+                        if (this.state === 'SWAPPING') {
                             const matches = this.checkMatches();
                             if (matches.size > 0) {
+                                this.combo = 0;
                                 this.processClear(matches);
                             } else {
                                 // 换回来
-                                this.doVirtualSwap(this.animData.p1.r, this.animData.p1.c, this.animData.p2.r, this.animData.p2.c);
-                                this.animState = 'IDLE';
-                                AudioEngine.block(); // 错误音效
+                                let {p1, p2, t1, t2} = this.animData;
+                                this.grid[p1.r][p1.c] = t1;
+                                this.grid[p2.r][p2.c] = t2;
+                                t1.targetX = p1.c * this.tileSize; t1.targetY = p1.r * this.tileSize;
+                                t2.targetX = p2.c * this.tileSize; t2.targetY = p2.r * this.tileSize;
+                                this.state = 'IDLE';
+                                AudioEngine.block(); 
                             }
-                        } else if (this.animState === 'CLEARING') {
+                        } else if (this.state === 'CLEARING') {
                             this.applyGravity();
-                        } else if (this.animState === 'FALLING') {
-                            this.animState = 'IDLE';
+                        } else if (this.state === 'FALLING') {
+                            this.state = 'IDLE';
                             const matches = this.checkMatches();
                             if (matches.size > 0) {
                                 this.processClear(matches);
-                            } else {
-                                this.checkDeadlock();
                             }
                         }
                     }
@@ -1108,40 +1139,62 @@
 
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
-                        let val = this.grid[r][c];
-                        let x = c * this.tileSize;
-                        let y = r * this.tileSize;
-                        
-                        if (val === 0) continue; // 空位
+                        let tile = this.grid[r][c];
+                        if (!tile || tile.id === 0 || tile.alpha === 0) continue;
 
-                        // 绘制方块 (用人物头像)
-                        let char = CHARACTERS.find(ch => ch.id === val);
+                        // 计算坐标
+                        let x = tile.x;
+                        let y = tile.y;
+                        let ts = this.tileSize;
+
+                        let char = CHARACTERS.find(ch => ch.id === tile.id);
                         let img = Assets.images[char.img];
                         
-                        // 绘制底框
-                        this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
-                        this.ctx.fillRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                        this.ctx.save();
+                        
+                        // 消除时的放大特效
+                        let renderScale = tile.scale;
+                        if (this.state === 'CLEARING' && this.animTimer > 10) {
+                            renderScale = 1 + (15 - this.animTimer) * 0.05;
+                        }
+                        
+                        this.ctx.translate(x + ts/2, y + ts/2);
+                        this.ctx.scale(renderScale, renderScale);
+                        this.ctx.globalAlpha = tile.alpha;
+
+                        // 绘制方块底框
+                        this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                        this.ctx.beginPath();
+                        this.ctx.roundRect(-ts/2 + 2, -ts/2 + 2, ts - 4, ts - 4, 8);
+                        this.ctx.fill();
 
                         // 绘制头像
                         if (img && img.complete) {
                             this.ctx.save();
                             this.ctx.beginPath();
-                            this.ctx.roundRect(x + 5, y + 5, this.tileSize - 10, this.tileSize - 10, 8);
+                            this.ctx.roundRect(-ts/2 + 4, -ts/2 + 4, ts - 8, ts - 8, 8);
                             this.ctx.clip();
-                            this.ctx.drawImage(img, x + 5, y + 5, this.tileSize - 10, this.tileSize - 10);
+                            // 保持图片比例居中裁剪
+                            let imgSize = Math.min(img.width, img.height);
+                            let sx = (img.width - imgSize) / 2;
+                            let sy = (img.height - imgSize) / 2;
+                            this.ctx.drawImage(img, sx, sy, imgSize, imgSize, -ts/2 + 4, -ts/2 + 4, ts - 8, ts - 8);
                             this.ctx.restore();
                         } else {
-                            // 兜底色块
                             this.ctx.fillStyle = char.color;
-                            this.ctx.fillRect(x + 5, y + 5, this.tileSize - 10, this.tileSize - 10);
+                            this.ctx.fillRect(-ts/2 + 4, -ts/2 + 4, ts - 8, ts - 8);
                         }
 
-                        // 选中高亮
+                        // 高亮边框
                         if (this.selected && this.selected.r === r && this.selected.c === c) {
                             this.ctx.strokeStyle = '#00ffcc';
                             this.ctx.lineWidth = 4;
-                            this.ctx.strokeRect(x + 2, y + 2, this.tileSize - 4, this.tileSize - 4);
+                            this.ctx.beginPath();
+                            this.ctx.roundRect(-ts/2 + 2, -ts/2 + 2, ts - 4, ts - 4, 8);
+                            this.ctx.stroke();
                         }
+
+                        this.ctx.restore();
                     }
                 }
             }
@@ -1179,9 +1232,8 @@
             requestAnimationFrame(loop);
         }
 
-        // 统一启动
         App.init();
         requestAnimationFrame(loop);
     </script>
 </body>
-                    </html>
+    </html>
