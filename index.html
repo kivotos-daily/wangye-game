@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五网页游戏大厅 - v3.1</title>
+    <title>十五网页游戏大厅 - v3.2</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #111; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; color: white; }
@@ -35,7 +35,6 @@
         .btn-fullscreen { position: absolute; top: 20px; left: 20px; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid #00ffcc; padding: 8px 16px; border-radius: 20px; font-size: 14px; cursor: pointer; z-index: 10; transition: 0.3s; font-weight: bold; }
         .btn-fullscreen:hover { background: rgba(0, 255, 204, 0.2); }
 
-        /* 战绩展示 */
         .win-record { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: 1px solid #ffd700; padding: 8px 16px; border-radius: 20px; font-size: 14px; color: #ffd700; font-weight: bold; z-index: 10; box-shadow: 0 0 10px rgba(255,215,0,0.3); }
 
         .menu-title { position: relative; z-index: 2; font-size: 4vw; font-weight: bold; color: #fff; margin-bottom: 10px; margin-top: -30px; letter-spacing: 8px; text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
@@ -163,21 +162,22 @@
         .control-side:last-child .btn-ult { background: rgba(255, 215, 0, 0.6); grid-area: 1 / 1; color: #000; }
         .control-side:last-child .btn-atk { background: rgba(255, 50, 50, 0.6); grid-area: 2 / 1; }
 
-        /* ==================== 6. 十五消消乐 CSS ==================== */
+        /* ==================== 6. 欢乐消消乐 CSS ==================== */
         #match3-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at center, #2b1b54, #0f0c29); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 120; opacity: 0; transition: opacity 0.3s; }
         #match3-screen.show { opacity: 1; }
         .m3-topbar { display: flex; justify-content: space-between; width: 90%; max-width: 480px; margin-bottom: 10px; align-items: center; }
         .m3-score { font-size: 28px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
         .m3-back { background: #666; color: #fff; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 16px; }
         
-        /* 玩法提示 */
-        .m3-tips { color: #00ffcc; font-size: 14px; margin-bottom: 15px; font-weight: bold; text-align: center; background: rgba(0, 255, 204, 0.1); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 255, 204, 0.3); }
+        .m3-tips { color: #00ffcc; font-size: 15px; margin-bottom: 15px; font-weight: bold; text-align: center; background: rgba(0, 255, 204, 0.1); padding: 8px 20px; border-radius: 20px; border: 1px solid rgba(0, 255, 204, 0.3); animation: pulseTip 2s infinite; }
+        @keyframes pulseTip { 0% { box-shadow: 0 0 0 0 rgba(0,255,204,0.4); } 70% { box-shadow: 0 0 0 10px rgba(0,255,204,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,204,0); } }
 
         .m3-canvas-box { background: rgba(0,0,0,0.6); border: 3px solid #00ffcc; border-radius: 15px; padding: 5px; box-shadow: 0 0 30px rgba(0,255,204,0.3); position: relative; }
         #m3Canvas { width: 90vw; max-width: 460px; aspect-ratio: 1/1; display: block; touch-action: none; }
         
         /* Combo 飘字 */
-        .combo-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000; opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s; }
+        .combo-text { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0.5); font-size: 60px; font-weight: bold; color: #ff3333; text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000; opacity: 0; pointer-events: none; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; }
+        .combo-text.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     </style>
 </head>
 <body>
@@ -205,19 +205,16 @@
             <div class="menu-subtitle" id="secret-trigger">CYBER GAME STATION</div>
             
             <div class="menu-grid">
-                <!-- 十五格斗 -->
                 <div class="menu-card active" onclick="App.openGame('fighting')">
                     <div class="card-icon">🥊</div>
                     <div class="card-title">十五格斗</div>
                     <div class="card-desc">双人同屏对战<br>操作爽快，拳拳到肉</div>
                 </div>
-                <!-- 十五消消乐 (已解锁) -->
                 <div class="menu-card active" onclick="App.openGame('match3')">
                     <div class="card-icon">🍬</div>
                     <div class="card-title">十五消消乐</div>
-                    <div class="card-desc">超爽快三消玩法<br>魔性消除根本停不下来</div>
+                    <div class="card-desc">滑动操作，极致丝滑<br>连击停不下来</div>
                 </div>
-                <!-- 十五斗地主 (未解锁) -->
                 <div class="menu-card locked">
                     <div class="card-icon">🃏</div>
                     <div class="card-title">十五斗地主</div>
@@ -347,7 +344,7 @@
                 <button class="m3-back" onclick="App.backToMenu()">返回大厅</button>
                 <div class="m3-score">得分: <span id="m3-score-text">0</span></div>
             </div>
-            <div class="m3-tips">👇 点击相邻头像交换，凑齐三个即可消除！</div>
+            <div class="m3-tips">👇 滑动方块进行交换，三个连成一线即可消除！</div>
             <div class="m3-canvas-box">
                 <canvas id="m3Canvas" width="480" height="480"></canvas>
                 <div class="combo-text" id="combo-text">Combo x2!</div>
@@ -359,11 +356,10 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">📢 游戏公告</div><button class="modal-close" onclick="closeModal('modal-notice')">×</button></div>
                 <div class="modal-content">
-                    <h4>🎉 十五游戏大厅 v3.1 更新：</h4>
-                    <p>1. **全新消消乐**：加了丝滑的动画特效，和明确的新手提示，快来试玩！</p>
-                    <p>2. **说明优化**：把那些看不懂的“代码说明”全删了，换成了大白话。</p>
-                    <p>3. **战绩系统**：打完架别忘了看看大厅右上角的战绩，看看谁是家里的格斗王。</p>
-                    <p>4. **隐藏彩蛋**：大厅的“CYBER GAME STATION”是可以点的，点十次有惊喜哦。</p>
+                    <h4>🎉 十五游戏大厅 v3.2 更新：</h4>
+                    <p>1. **消消乐史诗级重做**：现在支持丝滑的“滑动操作”，掉落和消除动画全面升级，加入了连击飘字和动感音效！</p>
+                    <p>2. **防死局系统**：消消乐如果没有可消除的方块，会自动洗牌。</p>
+                    <p>3. **新手引导优化**：在消消乐上方加了醒目的提示。</p>
                 </div>
             </div>
         </div>
@@ -371,17 +367,14 @@
             <div class="modal-box">
                 <div class="modal-header"><div class="modal-title">❓ 常见问题解答</div><button class="modal-close" onclick="closeModal('modal-faq')">×</button></div>
                 <div class="modal-content">
-                    <h4>Q1: 格斗游戏怎么放技能啊？</h4>
-                    <p>A: **电脑上**：左边玩家用 W、A、S、D 移动，J 是普攻，K 是大招（必须等底下的能量条亮了才能放）；右边玩家用 方向键 移动，小键盘 1 普攻，2 放大招。<br>**手机上**：屏幕左下角和右下角会直接长出虚拟按键，搓就完事了！</p>
+                    <h4>Q1: 消消乐到底怎么玩啊？划不动！</h4>
+                    <p>A: 在新版本中，您只需要**按住一个头像，然后向上、下、左、右滑动**，它就会和旁边的头像换位置啦！只要三个相同的头像连成横排或竖排，就能“嘭”地一下消除掉！</p>
                     
-                    <h4>Q2: 为啥打格斗的时候人物像个方块？</h4>
-                    <p>A: 那是人物照片还没加载完。因为要把绿幕背景抠掉，需要几秒钟时间。你稍微等一下，或者多滑两下屏幕，图像马上就出来了。</p>
+                    <h4>Q2: 为什么格斗游戏里的人物像个方块？</h4>
+                    <p>A: 那是人物照片还在后台处理。因为要把绿幕背景抠掉需要一点时间。你稍微等一下，或者多滑两下屏幕，图像马上就会“变”出来。</p>
                     
-                    <h4>Q3: 消消乐怎么玩？没看懂啊！</h4>
-                    <p>A: 很简单！你看上面的图块，比如有两个“辣子鸡”在挨着，你点一下其中一个，再点一下旁边另一个，它们就会互换位置。只要横着或竖着连成三个一模一样的头像，就能消除得分啦！</p>
-                    
-                    <h4>Q4: 游戏卡住了或者选错人怎么办？</h4>
-                    <p>A: 别慌，格斗界面中间有个“退出”按钮，消消乐左上角有个“返回大厅”按钮。点一下就能重开，如果还是卡，直接刷新一下网页就行。</p>
+                    <h4>Q3: 怎么和朋友在同一个手机上打格斗？</h4>
+                    <p>A: **电脑端**：P1 用 W/A/S/D 移动，J 普攻，K 必杀；P2 用 方向键 移动，小键盘 1 普攻，2 必杀。<br>**手机端**：屏幕左右两侧会各出现一套虚拟摇杆和按键，一人控制一边！</p>
                 </div>
             </div>
         </div>
@@ -415,7 +408,13 @@
             block() { this.playTone(400, 'sine', 0.1, 0.1); },
             ult() { this.playTone(600, 'sawtooth', 0.3, 0.15); setTimeout(() => this.playTone(200, 'square', 0.4, 0.2), 100); },
             click() { this.playTone(800, 'sine', 0.05, 0.05); },
-            match() { this.playTone(440, 'sine', 0.1, 0.1); setTimeout(() => this.playTone(554, 'sine', 0.1, 0.1), 50); setTimeout(() => this.playTone(659, 'sine', 0.15, 0.1), 100); }
+            swap() { this.playTone(300, 'triangle', 0.1, 0.1); },
+            error() { this.playTone(150, 'sawtooth', 0.2, 0.1); },
+            match(combo = 1) { 
+                let baseFreq = 500 + (combo * 100);
+                this.playTone(baseFreq, 'sine', 0.1, 0.1); 
+                setTimeout(() => this.playTone(baseFreq * 1.5, 'sine', 0.15, 0.1), 50); 
+            }
         };
 
         // ==========================================
@@ -893,36 +892,42 @@
         };
 
         // ==========================================
-        // 十五消消乐核心逻辑 (全新丝滑版)
+        // 欢乐消消乐核心逻辑 (Match3Game 重构版)
         // ==========================================
         const Match3Game = {
             isRunning: false,
             canvas: null, ctx: null,
-            size: 8, tileSize: 55, offsetX: 20, offsetY: 20, // 留白调整
-            grid: [], // 存放对象 { id, x, y, targetX, targetY, scale, alpha }
-            selected: null,
+            size: 8, tileSize: 55, padding: 5,
+            grid: [],
             score: 0,
             state: 'IDLE', // IDLE, SWAPPING, CLEARING, FALLING
             animTimer: 0,
             animData: null,
             combo: 0,
+            particles: [], // 消除时的粒子特效
+            
+            // 交互记录
+            pointerStart: { x: 0, y: 0 },
+            activeTile: null, // 当前按下的方块
 
             init() {
                 this.canvas = document.getElementById('m3Canvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.size = 8;
-                // 适配画布大小
                 this.tileSize = 480 / this.size; 
-                this.offsetX = 0; this.offsetY = 0;
 
                 this.score = 0; this.combo = 0;
                 document.getElementById('m3-score-text').innerText = this.score;
                 this.isRunning = true;
-                this.selected = null;
                 this.state = 'IDLE';
+                this.particles = [];
                 
                 this.generateGrid();
-                this.canvas.addEventListener('pointerdown', (e) => this.handleClick(e));
+                
+                // 绑定滑动事件
+                this.canvas.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+                this.canvas.addEventListener('pointerup', (e) => this.onPointerUp(e));
+                this.canvas.addEventListener('pointermove', (e) => this.onPointerMove(e));
             },
 
             generateGrid() {
@@ -932,7 +937,7 @@
                     for (let c = 0; c < this.size; c++) {
                         let charId;
                         do {
-                            charId = Math.floor(Math.random() * 5) + 1; // 1-5 对应 5 个角色
+                            charId = Math.floor(Math.random() * 5) + 1; 
                         } while (
                             (c >= 2 && row[c-1].id === charId && row[c-2].id === charId) || 
                             (r >= 2 && this.grid[r-1][c].id === charId && this.grid[r-2][c].id === charId)
@@ -951,56 +956,76 @@
                     targetX: c * this.tileSize,
                     targetY: r * this.tileSize,
                     scale: 1,
-                    alpha: 1
+                    alpha: 1,
+                    vy: 0 // 下落速度
                 };
             },
 
-            handleClick(e) {
-                if (!this.isRunning || this.state !== 'IDLE') return;
+            getPos(e) {
                 const rect = this.canvas.getBoundingClientRect();
                 const scaleX = this.canvas.width / rect.width;
                 const scaleY = this.canvas.height / rect.height;
-                const clickX = (e.clientX - rect.left) * scaleX;
-                const clickY = (e.clientY - rect.top) * scaleY;
+                const x = (e.clientX - rect.left) * scaleX;
+                const y = (e.clientY - rect.top) * scaleY;
+                return { r: Math.floor(y / this.tileSize), c: Math.floor(x / this.tileSize), x, y };
+            },
+
+            onPointerDown(e) {
+                if (!this.isRunning || this.state !== 'IDLE') return;
+                const pos = this.getPos(e);
+                if (pos.r < 0 || pos.r >= this.size || pos.c < 0 || pos.c >= this.size) return;
                 
-                const c = Math.floor(clickX / this.tileSize);
-                const r = Math.floor(clickY / this.tileSize);
-                if (r < 0 || r >= this.size || c < 0 || c >= this.size) return;
-
                 AudioEngine.click();
+                this.pointerStart = { x: e.clientX, y: e.clientY };
+                this.activeTile = { r: pos.r, c: pos.c, x: e.clientX, y: e.clientY };
+            },
 
-                if (!this.selected) {
-                    this.selected = { r, c };
-                } else {
-                    const prev = this.selected;
-                    if (prev.r === r && prev.c === c) {
-                        this.selected = null;
-                    } else if (Math.abs(prev.r - r) + Math.abs(prev.c - c) === 1) {
-                        // 相邻，交换
-                        this.selected = null;
-                        this.swapTiles(prev, { r, c });
+            onPointerMove(e) {
+                if (!this.isRunning || this.state !== 'IDLE' || !this.activeTile) return;
+                
+                // 计算滑动距离
+                let dx = e.clientX - this.pointerStart.x;
+                let dy = e.clientY - this.pointerStart.y;
+                let threshold = 20; // 滑动阈值
+
+                if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
+                    let targetR = this.activeTile.r;
+                    let targetC = this.activeTile.c;
+
+                    // 判断方向
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        targetC += dx > 0 ? 1 : -1; // 右滑或左滑
                     } else {
-                        this.selected = { r, c };
+                        targetR += dy > 0 ? 1 : -1; // 下滑或上滑
+                    }
+
+                    // 边界检测
+                    if (targetR >= 0 && targetR < this.size && targetC >= 0 && targetC < this.size) {
+                        this.swapTiles({r: this.activeTile.r, c: this.activeTile.c}, {r: targetR, c: targetC});
+                        this.activeTile = null; // 消耗掉
                     }
                 }
             },
 
+            onPointerUp(e) {
+                this.activeTile = null;
+            },
+
             swapTiles(p1, p2) {
                 this.state = 'SWAPPING';
+                AudioEngine.swap();
+                
                 let t1 = this.grid[p1.r][p1.c];
                 let t2 = this.grid[p2.r][p2.c];
                 
-                // 交换数据层
                 this.grid[p1.r][p1.c] = t2;
                 this.grid[p2.r][p2.c] = t1;
 
-                // 设置动画目标
-                t1.targetX = p2.c * this.tileSize;
-                t1.targetY = p2.r * this.tileSize;
-                t2.targetX = p1.c * this.tileSize;
-                t2.targetY = p1.r * this.tileSize;
+                t1.targetX = p2.c * this.tileSize; t1.targetY = p2.r * this.tileSize;
+                t2.targetX = p1.c * this.tileSize; t2.targetY = p1.r * this.tileSize;
 
                 this.animData = { p1, p2, t1, t2 };
+                this.animTimer = 10; // 交换缓冲时间
             },
 
             checkMatches() {
@@ -1028,18 +1053,13 @@
 
             processClear(matches) {
                 this.combo++;
-                AudioEngine.match();
+                AudioEngine.match(this.combo);
                 
-                // 连击飘字
                 if (this.combo > 1) {
                     const comboEl = document.getElementById('combo-text');
                     comboEl.innerText = `Combo x${this.combo}!`;
-                    comboEl.style.opacity = 1;
-                    comboEl.style.transform = 'translate(-50%, -80%) scale(1.2)';
-                    setTimeout(() => {
-                        comboEl.style.opacity = 0;
-                        comboEl.style.transform = 'translate(-50%, -50%) scale(1)';
-                    }, 500);
+                    comboEl.classList.add('show');
+                    setTimeout(() => { comboEl.classList.remove('show'); }, 800);
                 }
 
                 this.score += matches.size * 10 * this.combo;
@@ -1047,7 +1067,20 @@
 
                 matches.forEach(pos => {
                     let [r, c] = pos.split(',').map(Number);
-                    this.grid[r][c].alpha = 0; // 淡出动画
+                    let tile = this.grid[r][c];
+                    tile.state = 'CLEARING';
+                    
+                    // 生成粒子
+                    for(let i=0; i<5; i++) {
+                        this.particles.push({
+                            x: tile.x + this.tileSize/2,
+                            y: tile.y + this.tileSize/2,
+                            vx: (Math.random() - 0.5) * 10,
+                            vy: (Math.random() - 0.5) * 10,
+                            life: 1,
+                            color: CHARACTERS.find(ch => ch.id === tile.id).color
+                        });
+                    }
                 });
                 
                 this.state = 'CLEARING';
@@ -1055,54 +1088,73 @@
             },
 
             applyGravity() {
-                let dropped = false;
                 for (let c = 0; c < this.size; c++) {
                     let emptySpace = 0;
                     for (let r = this.size - 1; r >= 0; r--) {
-                        if (this.grid[r][c].alpha === 0) {
+                        if (this.grid[r][c].id === 0) {
                             emptySpace++;
                         } else if (emptySpace > 0) {
                             // 下落
                             this.grid[r + emptySpace][c] = this.grid[r][c];
                             this.grid[r][c] = this.createTile(0, r, c);
                             this.grid[r + emptySpace][c].targetY = (r + emptySpace) * this.tileSize;
-                            dropped = true;
                         }
                     }
-                    // 填充新方块
+                    // 顶部填充
                     for (let r = 0; r < emptySpace; r++) {
                         let newId = Math.floor(Math.random() * 5) + 1;
                         let newTile = this.createTile(newId, r, c);
-                        newTile.y = -1 * this.tileSize * (emptySpace - r); // 从屏幕上方掉下来
+                        // 从屏幕上方掉落
+                        newTile.y = -1 * this.tileSize * (emptySpace - r); 
                         this.grid[r][c] = newTile;
-                        dropped = true;
                     }
                 }
                 this.state = 'FALLING';
-                this.animTimer = 20;
+                this.animTimer = 25; // 掉落缓冲时间
             },
 
             update() {
                 if (!this.isRunning) return;
 
-                // 1. 更新所有方块的动画坐标
+                // 1. 物理动画更新
                 let isAnimating = false;
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         let tile = this.grid[r][c];
                         if (!tile || tile.id === 0) continue;
-                        // 平滑移动
-                        if (Math.abs(tile.x - tile.targetX) > 1 || Math.abs(tile.y - tile.targetY) > 1) {
-                            tile.x += (tile.targetX - tile.x) * 0.3;
-                            tile.y += (tile.targetY - tile.y) * 0.3;
-                            isAnimating = true;
+                        
+                        if (this.state === 'FALLING') {
+                            // 重力下落
+                            tile.vy += 2; // 重力加速度
+                            tile.y += tile.vy;
+                            if (tile.y >= tile.targetY) {
+                                tile.y = tile.targetY;
+                                tile.vy = 0;
+                            } else {
+                                isAnimating = true;
+                            }
                         } else {
-                            tile.x = tile.targetX; tile.y = tile.targetY;
+                            // 缓动移动（用于交换）
+                            if (Math.abs(tile.x - tile.targetX) > 1 || Math.abs(tile.y - tile.targetY) > 1) {
+                                tile.x += (tile.targetX - tile.x) * 0.4;
+                                tile.y += (tile.targetY - tile.y) * 0.4;
+                            } else {
+                                tile.x = tile.targetX; tile.y = tile.targetY;
+                            }
                         }
                     }
                 }
 
-                // 2. 状态机流转
+                // 2. 粒子动画
+                for(let i = this.particles.length - 1; i>=0; i--) {
+                    let p = this.particles[i];
+                    p.x += p.vx; p.y += p.vy;
+                    p.vy += 0.2; // 粒子重力
+                    p.life -= 0.05;
+                    if(p.life <= 0) this.particles.splice(i, 1);
+                }
+
+                // 3. 状态流转
                 if (this.animTimer > 0) {
                     this.animTimer--;
                     if (this.animTimer === 0) {
@@ -1112,26 +1164,52 @@
                                 this.combo = 0;
                                 this.processClear(matches);
                             } else {
-                                // 换回来
+                                // 无效交换，换回去
                                 let {p1, p2, t1, t2} = this.animData;
-                                this.grid[p1.r][p1.c] = t1;
-                                this.grid[p2.r][p2.c] = t2;
+                                this.grid[p1.r][p1.c] = t1; this.grid[p2.r][p2.c] = t2;
                                 t1.targetX = p1.c * this.tileSize; t1.targetY = p1.r * this.tileSize;
                                 t2.targetX = p2.c * this.tileSize; t2.targetY = p2.r * this.tileSize;
                                 this.state = 'IDLE';
-                                AudioEngine.block(); 
+                                AudioEngine.error();
                             }
                         } else if (this.state === 'CLEARING') {
                             this.applyGravity();
                         } else if (this.state === 'FALLING') {
-                            this.state = 'IDLE';
                             const matches = this.checkMatches();
                             if (matches.size > 0) {
                                 this.processClear(matches);
+                            } else {
+                                this.state = 'IDLE';
+                                this.checkDeadlock();
                             }
                         }
                     }
                 }
+            },
+
+            checkDeadlock() {
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        if (c < this.size - 1) {
+                            this.doVirtualSwap(r, c, r, c + 1);
+                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r, c + 1); return; }
+                            this.doVirtualSwap(r, c, r, c + 1);
+                        }
+                        if (r < this.size - 1) {
+                            this.doVirtualSwap(r, c, r + 1, c);
+                            if (this.checkMatches().size > 0) { this.doVirtualSwap(r, c, r + 1, c); return; }
+                            this.doVirtualSwap(r, c, r + 1, c);
+                        }
+                    }
+                }
+                // 没死局就洗牌
+                this.generateGrid();
+            },
+
+            doVirtualSwap(r1, c1, r2, c2) {
+                let temp = this.grid[r1][c1];
+                this.grid[r1][c1] = this.grid[r2][c2];
+                this.grid[r2][c2] = temp;
             },
 
             render() {
@@ -1140,30 +1218,33 @@
                 for (let r = 0; r < this.size; r++) {
                     for (let c = 0; c < this.size; c++) {
                         let tile = this.grid[r][c];
-                        if (!tile || tile.id === 0 || tile.alpha === 0) continue;
+                        if (!tile || tile.id === 0) continue;
 
-                        // 计算坐标
-                        let x = tile.x;
-                        let y = tile.y;
                         let ts = this.tileSize;
-
                         let char = CHARACTERS.find(ch => ch.id === tile.id);
                         let img = Assets.images[char.img];
                         
                         this.ctx.save();
                         
-                        // 消除时的放大特效
-                        let renderScale = tile.scale;
-                        if (this.state === 'CLEARING' && this.animTimer > 10) {
-                            renderScale = 1 + (15 - this.animTimer) * 0.05;
-                        }
+                        // 动画缩放
+                        let renderScale = 1;
+                        let renderAlpha = 1;
                         
-                        this.ctx.translate(x + ts/2, y + ts/2);
-                        this.ctx.scale(renderScale, renderScale);
-                        this.ctx.globalAlpha = tile.alpha;
+                        if (this.state === 'CLEARING' && this.animTimer > 5) {
+                            // 消除时放大并淡出
+                            renderScale = 1 + (15 - this.animTimer) * 0.1;
+                            renderAlpha = this.animTimer / 15;
+                        }
+                        if (this.activeTile && this.activeTile.r === r && this.activeTile.c === c) {
+                            renderScale = 1.1; // 选中放大
+                        }
 
-                        // 绘制方块底框
-                        this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                        this.ctx.translate(tile.x + ts/2, tile.y + ts/2);
+                        this.ctx.scale(renderScale, renderScale);
+                        this.ctx.globalAlpha = renderAlpha;
+
+                        // 阴影/底框
+                        this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
                         this.ctx.beginPath();
                         this.ctx.roundRect(-ts/2 + 2, -ts/2 + 2, ts - 4, ts - 4, 8);
                         this.ctx.fill();
@@ -1174,7 +1255,6 @@
                             this.ctx.beginPath();
                             this.ctx.roundRect(-ts/2 + 4, -ts/2 + 4, ts - 8, ts - 8, 8);
                             this.ctx.clip();
-                            // 保持图片比例居中裁剪
                             let imgSize = Math.min(img.width, img.height);
                             let sx = (img.width - imgSize) / 2;
                             let sy = (img.height - imgSize) / 2;
@@ -1185,18 +1265,19 @@
                             this.ctx.fillRect(-ts/2 + 4, -ts/2 + 4, ts - 8, ts - 8);
                         }
 
-                        // 高亮边框
-                        if (this.selected && this.selected.r === r && this.selected.c === c) {
-                            this.ctx.strokeStyle = '#00ffcc';
-                            this.ctx.lineWidth = 4;
-                            this.ctx.beginPath();
-                            this.ctx.roundRect(-ts/2 + 2, -ts/2 + 2, ts - 4, ts - 4, 8);
-                            this.ctx.stroke();
-                        }
-
                         this.ctx.restore();
                     }
                 }
+
+                // 绘制粒子特效
+                this.particles.forEach(p => {
+                    this.ctx.fillStyle = p.color;
+                    this.ctx.globalAlpha = p.life;
+                    this.ctx.beginPath();
+                    this.ctx.arc(p.x, p.y, 4, 0, Math.PI*2);
+                    this.ctx.fill();
+                });
+                this.ctx.globalAlpha = 1;
             }
         };
 
@@ -1236,4 +1317,4 @@
         requestAnimationFrame(loop);
     </script>
 </body>
-    </html>
+                        </html>
