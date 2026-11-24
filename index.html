@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五格斗-测试版v1.5</title>
+    <title>十五格斗-测试版v1.6</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #1a1a2e; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; }
@@ -11,18 +11,22 @@
         #game-container { position: relative; width: 100%; max-width: 1200px; height: 100vh; max-height: 800px; aspect-ratio: 16/9; overflow: hidden; background: #000; }
         canvas { width: 100%; height: 100%; display: block; }
 
+        /* 加载界面 */
+        #loading-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; color: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        .loader { border: 5px solid #333; border-top: 5px solid #ffd700; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
         /* ==================== 选人界面 CSS ==================== */
         #select-screen {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #2b1b54, #4b1b73);
-            display: flex; flex-direction: column; color: white; z-index: 50; transition: opacity 0.3s;
+            display: none; flex-direction: column; color: white; z-index: 50; transition: opacity 0.3s;
         }
         .select-header { text-align: center; padding: 10px 0; }
         .select-header h1 { font-size: 28px; color: #ffd700; text-shadow: 2px 2px 0 #000; margin-bottom: 5px; }
         
         .select-main { flex: 1; display: flex; justify-content: space-between; padding: 0 20px; overflow: hidden; }
         
-        /* 左右两侧独立选人区 */
         .player-panel { width: 45%; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; position: relative; border: 2px solid transparent; }
         .player-panel.p1-active { border-color: #00ccff; box-shadow: 0 0 15px rgba(0,204,255,0.3); }
         .player-panel.p2-active { border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.3); }
@@ -31,25 +35,21 @@
         .p1-title { color: #00ccff; }
         .p2-title { color: #ff3333; }
 
-        /* 左右切换按钮 */
         .char-selector { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 10px; }
         .nav-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 30px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
         .nav-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
         
         .char-name-badge { background: #333; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid white; font-size: 16px; text-align: center; flex: 1; margin: 0 10px; }
         
-        /* 展示框 */
         .char-img-box { width: 100%; height: 200px; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); }
         .char-img-box img { width: 100%; height: 100%; object-fit: contain; }
         
         .char-ult { color: #ffd700; font-weight: bold; margin-top: 10px; font-size: 16px; text-shadow: 1px 1px 0 #000; }
         .char-desc { font-size: 12px; color: #aaa; text-align: center; margin-top: 10px; line-height: 1.4; }
 
-        /* 底部开始按钮 */
         .select-footer { padding: 15px; text-align: center; }
         .btn-start { background: #ffd700; color: #000; font-size: 22px; font-weight: bold; padding: 10px 60px; border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 5px 0 #b38f00; transition: 0.1s; }
         .btn-start:active { transform: translateY(5px); box-shadow: none; }
-        .btn-start:disabled { background: #666; box-shadow: 0 5px 0 #333; color: #aaa; pointer-events: none; }
 
         /* ==================== 战斗界面 UI CSS ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
@@ -92,6 +92,12 @@
 </head>
 <body>
     <div id="game-container">
+        <!-- 加载画面 -->
+        <div id="loading-screen">
+            <div class="loader"></div>
+            <h2 id="loading-text">正在加载角色图像 0/10...</h2>
+        </div>
+
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
 
         <div id="battle-ui">
@@ -145,16 +151,15 @@
             </div>
         </div>
 
-        <!-- 全新选人界面 -->
+        <!-- 选人界面 -->
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v1.5 - 双方独立选人</p>
+                <p>测试版 v1.6 - 双方独立选人</p>
             </div>
             
             <div class="select-main">
-                <!-- 左侧 P1 选人 -->
-                <div class="player-panel p1-active" id="p1-panel">
+                <div class="player-panel p1-active">
                     <div class="player-title p1-title">PLAYER 1</div>
                     <div class="char-selector">
                         <button class="nav-btn" onclick="UI.changeChar(1, -1)">◀</button>
@@ -163,11 +168,10 @@
                     </div>
                     <div class="char-img-box" id="p1-img-box"></div>
                     <div class="char-ult" id="p1-ult-text">必杀「曼巴冲撞」</div>
-                    <div class="char-desc" id="p1-desc">力量型，攻击强，机动慢。</div>
+                    <div class="char-desc" id="p1-desc"></div>
                 </div>
 
-                <!-- 右侧 P2 选人 -->
-                <div class="player-panel p2-active" id="p2-panel">
+                <div class="player-panel p2-active">
                     <div class="player-title p2-title">PLAYER 2</div>
                     <div class="char-selector">
                         <button class="nav-btn" onclick="UI.changeChar(2, -1)">◀</button>
@@ -176,7 +180,7 @@
                     </div>
                     <div class="char-img-box" id="p2-img-box"></div>
                     <div class="char-ult" id="p2-ult-text">必杀「生理恐吓」</div>
-                    <div class="char-desc" id="p2-desc">属性低，大招耗能极低。</div>
+                    <div class="char-desc" id="p2-desc"></div>
                 </div>
             </div>
 
@@ -187,12 +191,9 @@
     </div>
 
     <script>
-        const GAME_VERSION = "测试版v1.5";
+        const GAME_VERSION = "测试版v1.6";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-
-        // 战斗抠图缓存
-        const ImageCache = {};
 
         const CHARACTERS = [
             { id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", ultName: "曼巴冲撞", desc: "力量强机动慢。冲刺撞击。", maxHp: 120, speed: 200, jump: -800, atkDmg: 15, ultCost: 100 },
@@ -202,8 +203,39 @@
             { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", ultName: "生理恐吓", desc: "大招耗能极低。硬控并夺取属性。", maxHp: 60, speed: 180, jump: -700, atkDmg: 3, ultCost: 40 }
         ];
 
+        // ================= 预加载系统 =================
+        const Assets = { images: {}, loaded: 0, total: 0 };
+        
+        function preloadAssets(callback) {
+            let urls = [];
+            CHARACTERS.forEach(c => { urls.push(c.img); urls.push(c.img_cut); });
+            Assets.total = urls.length;
+            
+            urls.forEach(url => {
+                let img = new Image();
+                img.src = url;
+                img.onload = () => {
+                    Assets.images[url] = img;
+                    Assets.loaded++;
+                    document.getElementById('loading-text').innerText = `正在加载角色图像 ${Assets.loaded}/${Assets.total}...`;
+                    if (Assets.loaded === Assets.total) callback();
+                };
+                img.onerror = () => {
+                    // 如果缺图，也继续走流程
+                    Assets.loaded++;
+                    if (Assets.loaded === Assets.total) callback();
+                };
+            });
+        }
+        preloadAssets(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('select-screen').style.display = 'flex';
+            UI.init();
+        });
+
+        // ================= 输入控制 =================
         const Input = {
-            keys: {}, prevKeys: {},
+            keys: {},
             init() {
                 window.addEventListener('keydown', e => this.keys[e.code] = true);
                 window.addEventListener('keyup', e => this.keys[e.code] = false);
@@ -217,23 +249,51 @@
                     btn.addEventListener('pointerleave', release);
                 });
             },
-            isDown(code) { return !!this.keys[code]; },
-            update() { this.prevKeys = { ...this.keys }; }
+            isDown(code) { return !!this.keys[code]; }
         };
         Input.init();
 
         const STATE = { IDLE: 0, WALK: 1, JUMP: 2, BLOCK: 3, HIT: 4, ATTACK: 5, DEAD: 6, STUNNED: 7 };
 
+        // ================= 粒子系统 (火花) =================
+        const Particles = {
+            list: [],
+            spawn(x, y, color, count = 5) {
+                for(let i=0; i<count; i++) {
+                    this.list.push({
+                        x: x, y: y,
+                        vx: (Math.random() - 0.5) * 600,
+                        vy: (Math.random() - 0.5) * 600,
+                        life: 1, color: color
+                    });
+                }
+            },
+            update() {
+                for(let i = this.list.length - 1; i >= 0; i--) {
+                    let p = this.list[i];
+                    p.x += p.vx / 60; p.y += p.vy / 60;
+                    p.life -= 0.05;
+                    if(p.life <= 0) this.list.splice(i, 1);
+                }
+            },
+            render(ctx) {
+                this.list.forEach(p => {
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life;
+                    ctx.fillRect(p.x, p.y, 4, 4);
+                });
+                ctx.globalAlpha = 1;
+            }
+        };
+
         class Projectile {
             constructor(x, y, vx, owner, type) {
                 this.x = x; this.y = y; this.vx = vx; this.owner = owner; this.type = type;
                 this.width = type === 'halberd' ? 80 : 50; this.height = type === 'halberd' ? 30 : 50;
-                this.active = true; this.life = 120;
-                this.angle = 0;
+                this.active = true; this.life = 120; this.angle = 0;
             }
             update() {
-                this.x += this.vx / 60; this.life--;
-                this.angle += 0.2;
+                this.x += this.vx / 60; this.life--; this.angle += 0.2;
                 if (this.life <= 0 || this.x < 0 || this.x > canvas.width) this.active = false;
             }
             getHurtbox() { return { x: this.x - this.width/2, y: this.y - this.height/2, w: this.width, h: this.height }; }
@@ -253,18 +313,8 @@
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0;
                 this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
                 
-                // 动画参数
-                this.flashTimer = 0; // 受击闪白
-                this.breathTime = Math.random() * 10; // 呼吸偏移
-                this.yOffset = 0; // 视觉Y偏移
-
-                // 预加载战斗抠图
-                if (!ImageCache[this.config.img_cut]) {
-                    let img = new Image();
-                    img.src = this.config.img_cut;
-                    img.onerror = () => console.warn("缺少抠图: " + this.config.img_cut);
-                    ImageCache[this.config.img_cut] = img;
-                }
+                this.flashTimer = 0; this.breathTime = Math.random() * 10; this.yOffset = 0; 
+                this.trail = []; // 残影队列
             }
 
             update() {
@@ -294,13 +344,16 @@
                 this.x += this.vx / 60;
                 if (this.x < 80) this.x = 80; if (this.x > canvas.width - 80) this.x = canvas.width - 80;
 
-                // 视觉浮动计算
-                if (this.state === STATE.IDLE) {
-                    this.yOffset = Math.sin(this.breathTime) * 3;
-                } else if (this.state === STATE.BLOCK) {
-                    this.yOffset = 2; // 防御微微下蹲
+                if (this.state === STATE.IDLE) this.yOffset = Math.sin(this.breathTime) * 3;
+                else if (this.state === STATE.BLOCK) this.yOffset = 2;
+                else this.yOffset = 0;
+
+                // 残影更新
+                if (Math.abs(this.vx) > 300 || this.state === STATE.JUMP) {
+                    this.trail.unshift({ x: this.x, y: this.y, facing: this.facing });
+                    if (this.trail.length > 5) this.trail.pop();
                 } else {
-                    this.yOffset = 0;
+                    if(this.trail.length > 0) this.trail.pop();
                 }
             }
 
@@ -396,7 +449,7 @@
                 if (type === "halberd") this.hp -= this.maxHp * 0.20; else this.hp -= attackData.dmg;
                 this.energy = Math.min(this.maxEnergy, this.energy + 15);
                 this.hitstop = 6; attacker.hitstop = 6;
-                this.flashTimer = 6; // 受击闪白时间
+                this.flashTimer = 6; 
                 
                 if (this.hp <= 0) { this.hp = 0; this.changeState(STATE.DEAD); return; }
                 if (this.state !== STATE.BLOCK) { this.changeState(STATE.HIT); this.vx = attacker.facing * 300; }
@@ -406,96 +459,87 @@
 
             render() {
                 const hurt = this.getHurtbox();
-                
-                // 如果处于受击闪白状态，使用发光滤镜
-                if (this.flashTimer > 0) {
-                    ctx.filter = 'brightness(3) grayscale(1)';
-                } else {
-                    ctx.filter = 'none';
-                }
 
-                const img = ImageCache[this.config.img_cut];
-                if (img && img.complete && img.naturalWidth > 0) {
-                    if (this.facing === -1) {
-                        ctx.save();
-                        ctx.translate(this.x, this.y + this.yOffset);
-                        // 受击或攻击时做轻微挤压拉伸
-                        let scaleX = 1, scaleY = 1;
-                        if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; }
-                        if (this.state === STATE.HIT) { scaleX = 1.2; scaleY = 0.8; }
-                        if (this.state === STATE.JUMP) { scaleX = 0.9; scaleY = 1.1; }
-                        
-                        ctx.scale(-scaleX, scaleY);
-                        ctx.drawImage(img, -hurt.w/2, -hurt.h, hurt.w, hurt.h);
-                        ctx.restore();
-                    } else {
-                        ctx.save();
-                        ctx.translate(this.x, this.y + this.yOffset);
-                        let scaleX = 1, scaleY = 1;
-                        if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; }
-                        if (this.state === STATE.HIT) { scaleX = 1.2; scaleY = 0.8; }
-                        if (this.state === STATE.JUMP) { scaleX = 0.9; scaleY = 1.1; }
-                        
-                        ctx.scale(scaleX, scaleY);
-                        ctx.drawImage(img, -hurt.w/2, -hurt.h, hurt.w, hurt.h);
-                        ctx.restore();
-                    }
-                } else {
-                    // 兜底色块
-                    ctx.fillStyle = this.config.color;
-                    ctx.fillRect(hurt.x, hurt.y, hurt.w, hurt.h);
-                    ctx.fillStyle = 'black';
-                    ctx.fillRect(this.x - 15 + this.facing * 20, this.y + this.yOffset - 120, 10, 10);
-                    ctx.fillRect(this.x + 5 + this.facing * 20, this.y + this.yOffset - 120, 10, 10);
-                }
-                
-                // 重置滤镜，防止影响后续渲染
+                // 1. 绘制残影
+                this.trail.forEach((t, i) => {
+                    ctx.globalAlpha = 0.2 * (i / this.trail.length);
+                    this.drawBody(t.x, t.y, t.facing, true);
+                });
+                ctx.globalAlpha = 1;
+
+                // 2. 绘制本体
+                if (this.flashTimer > 0) ctx.filter = 'brightness(3) grayscale(1)';
+                else ctx.filter = 'none';
+                this.drawBody(this.x, this.y + this.yOffset, this.facing, false);
                 ctx.filter = 'none';
 
-                // ================== 绘制防御护盾 ==================
+                // 3. 绘制防御护盾
                 if (this.state === STATE.BLOCK) {
                     ctx.save();
                     ctx.translate(this.x + this.facing * 60, this.y + this.yOffset - 80);
                     ctx.beginPath();
-                    // 画一个半弧作为护盾
                     ctx.arc(0, 0, 90, -Math.PI/2, Math.PI/2, this.facing === -1);
                     
-                    // 护盾样式：蓝色半透明
-                    ctx.strokeStyle = 'rgba(0, 200, 255, 0.8)';
+                    // 呼吸流光
+                    let shieldAlpha = 0.5 + Math.sin(Date.now() / 150) * 0.2;
+                    ctx.strokeStyle = `rgba(0, 200, 255, ${shieldAlpha})`;
                     ctx.lineWidth = 6;
-                    ctx.shadowBlur = 20;
-                    ctx.shadowColor = '#00ffff';
+                    ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
                     ctx.stroke();
                     
-                    // 填充淡淡的光晕
-                    ctx.fillStyle = 'rgba(0, 200, 255, 0.2)';
+                    ctx.fillStyle = `rgba(0, 200, 255, 0.15)`;
                     ctx.fill();
                     ctx.restore();
                 }
 
-                // Debug 判定框
+                // 4. Debug 判定框
                 if (this.state === STATE.ATTACK) {
                     const hit = this.getHitbox();
-                    if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 3; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
+                    if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 2; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
+                }
+            }
+
+            drawBody(x, y, facing, isGhost) {
+                const hurt = this.getHurtbox();
+                const img = Assets.images[this.config.img_cut];
+                
+                if (img && img.complete && img.naturalWidth > 0) {
+                    ctx.save();
+                    ctx.translate(x, y);
+                    let scaleX = 1, scaleY = 1;
+                    if (!isGhost) {
+                        if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; }
+                        if (this.state === STATE.HIT) { scaleX = 1.2; scaleY = 0.8; }
+                        if (this.state === STATE.JUMP) { scaleX = 0.9; scaleY = 1.1; }
+                    }
+                    ctx.scale(facing * scaleX, scaleY);
+                    ctx.drawImage(img, -hurt.w/2, -hurt.h, hurt.w, hurt.h);
+                    ctx.restore();
+                } else {
+                    ctx.fillStyle = this.config.color;
+                    ctx.fillRect(x - hurt.w/2, y - hurt.h, hurt.w, hurt.h);
+                    ctx.fillStyle = 'black';
+                    ctx.fillRect(x - 15 + facing * 20, y - 120, 10, 10);
+                    ctx.fillRect(x + 5 + facing * 20, y - 120, 10, 10);
                 }
             }
         }
 
         const Game = {
             p1: null, p2: null, projectiles: [], isRunning: false, matchOver: false,
+            shakeTimer: 0, // 屏幕震动
             
             init(c1, c2) {
-                this.p1 = new Fighter(true, c1);
-                this.p2 = new Fighter(false, c2);
-                this.projectiles = [];
-                this.isRunning = true; this.matchOver = false;
+                this.p1 = new Fighter(true, c1); this.p2 = new Fighter(false, c2);
+                this.projectiles = []; this.isRunning = true; this.matchOver = false;
+                this.shakeTimer = 0;
                 
                 document.getElementById('battle-ui').style.display = 'block';
                 document.getElementById('p1-hud-name').innerText = this.p1.config.name;
                 document.getElementById('p2-hud-name').innerText = this.p2.config.name;
                 
-                document.getElementById('p1-hud-avatar').innerHTML = `<img src="${this.p1.config.img}" onerror="this.style.display='none'; this.parentElement.style.background='${this.p1.config.color}'">`;
-                document.getElementById('p2-hud-avatar').innerHTML = `<img src="${this.p2.config.img}" onerror="this.style.display='none'; this.parentElement.style.background='${this.p2.config.color}'">`;
+                document.getElementById('p1-hud-avatar').innerHTML = `<img src="${this.p1.config.img}">`;
+                document.getElementById('p2-hud-avatar').innerHTML = `<img src="${this.p2.config.img}">`;
             },
 
             updateUI() {
@@ -512,8 +556,7 @@
                 target.hp = Math.max(0, target.hp - drain); caster.hp = Math.min(caster.maxHp, caster.hp + drain);
                 target.currentAtk = Math.max(1, target.currentAtk - 2); target.currentSpeed = Math.max(50, target.currentSpeed - 15);
                 caster.currentAtk += 2; caster.currentSpeed += 15;
-                target.hitstop = 10; caster.hitstop = 10;
-                target.flashTimer = 10;
+                target.hitstop = 10; caster.hitstop = 10; target.flashTimer = 10;
                 if (target.hp <= 0) { target.hp = 0; target.changeState(STATE.DEAD); }
             },
             triggerGlobalStun(attacker) {
@@ -523,9 +566,13 @@
 
             tick() {
                 if (!this.isRunning || this.matchOver) return;
+                if (this.shakeTimer > 0) this.shakeTimer--;
+
                 this.p1.update(); this.p2.update();
                 this.projectiles.forEach(p => p.update());
                 this.projectiles = this.projectiles.filter(p => p.active);
+                Particles.update();
+                
                 this.checkCombat(this.p1, this.p2); this.checkCombat(this.p2, this.p1);
                 this.projectiles.forEach(p => {
                     const target = p.owner === this.p1 ? this.p2 : this.p1;
@@ -533,6 +580,9 @@
                         p.active = false;
                         if (p.type === 'data') { target.applyStun(120); target.hp -= 5; target.flashTimer = 10; }
                         else if (p.type === 'halberd') target.receiveHit(p.owner, { dmg: 0 }, "halberd");
+                        
+                        Particles.spawn(p.x, p.y, '#fff', 10);
+                        this.shakeTimer = 5;
                     }
                 });
 
@@ -550,20 +600,31 @@
             checkCombat(attacker, target) {
                 const hit = attacker.getHitbox(); const hurt = target.getHurtbox();
                 if (hit && !attacker.hasHitThisAttack && this.checkAABB(hit, hurt)) {
-                    attacker.hasHitThisAttack = true; target.receiveHit(attacker, attacker.attackData);
+                    attacker.hasHitThisAttack = true; 
+                    target.receiveHit(attacker, attacker.attackData);
+                    
+                    // 击打特效与屏幕震动
+                    Particles.spawn((attacker.x + target.x)/2, target.y - 80, target.state === STATE.BLOCK ? '#00ffff' : '#ff0000', 15);
+                    this.shakeTimer = target.state === STATE.BLOCK ? 3 : 8;
                 }
             },
 
             checkAABB(r1, r2) { return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; },
 
             render() {
-                // 绘制渐变背景
+                ctx.save();
+                // 处理屏幕震动
+                if (this.shakeTimer > 0) {
+                    let dx = (Math.random() - 0.5) * this.shakeTimer * 2;
+                    let dy = (Math.random() - 0.5) * this.shakeTimer * 2;
+                    ctx.translate(dx, dy);
+                }
+
                 let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
                 bgGrad.addColorStop(0, '#1a1a2e');
                 bgGrad.addColorStop(1, '#0f0f1b');
                 ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                // 地面
                 ctx.fillStyle = '#222'; ctx.fillRect(0, 550, canvas.width, 125);
                 ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
                 for(let i=0; i<canvas.width; i+=100) {
@@ -573,36 +634,27 @@
                 if (this.isRunning) {
                     this.p1.render(); this.p2.render();
                     this.projectiles.forEach(p => {
-                        ctx.save();
-                        ctx.translate(p.x, p.y);
-                        if(p.type === 'halberd') ctx.rotate(p.angle);
-                        
+                        ctx.save(); ctx.translate(p.x, p.y); if(p.type === 'halberd') ctx.rotate(p.angle);
                         ctx.fillStyle = p.type === 'data' ? '#00ffff' : '#ffaa00';
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = ctx.fillStyle;
-                        
-                        const h = p.getHurtbox();
-                        ctx.fillRect(-h.w/2, -h.h/2, h.w, h.h);
+                        ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+                        const h = p.getHurtbox(); ctx.fillRect(-h.w/2, -h.h/2, h.w, h.h);
                         ctx.restore();
                     });
+                    
+                    Particles.render(ctx);
                 }
+                ctx.restore();
             }
         };
 
         const UI = {
-            p1Index: 0,
-            p2Index: 4,
+            p1Index: 0, p2Index: 4,
             
-            init() {
-                this.updateShowcases();
-            },
+            init() { this.updateShowcases(); },
 
             changeChar(player, dir) {
-                if (player === 1) {
-                    this.p1Index = (this.p1Index + dir + CHARACTERS.length) % CHARACTERS.length;
-                } else {
-                    this.p2Index = (this.p2Index + dir + CHARACTERS.length) % CHARACTERS.length;
-                }
+                if (player === 1) this.p1Index = (this.p1Index + dir + CHARACTERS.length) % CHARACTERS.length;
+                else this.p2Index = (this.p2Index + dir + CHARACTERS.length) % CHARACTERS.length;
                 this.updateShowcases();
             },
 
@@ -641,19 +693,15 @@
 
         function loop(time) {
             const dt = (time - lastTime) / 1000; lastTime = time;
-            
             if (Game.isRunning && !Game.matchOver) {
                 acc += dt;
                 while (acc >= 1/60) { Game.tick(); acc -= 1/60; }
             }
-            
             Game.render();
-            Input.update();
             requestAnimationFrame(loop);
         }
 
-        UI.init();
         requestAnimationFrame(loop);
     </script>
 </body>
-</html>
+    </html>
