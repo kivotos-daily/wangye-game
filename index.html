@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>十五格斗-测试版v1.6</title>
+    <title>十五格斗-测试版v1.7</title>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; margin: 0; padding: 0; }
         body { background: #1a1a2e; height: 100vh; display: flex; justify-content: center; align-items: center; font-family: "Microsoft YaHei", sans-serif; overflow: hidden; }
@@ -27,29 +27,40 @@
         
         .select-main { flex: 1; display: flex; justify-content: space-between; padding: 0 20px; overflow: hidden; }
         
-        .player-panel { width: 45%; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; position: relative; border: 2px solid transparent; }
+        .player-panel { width: 46%; display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.3); border-radius: 15px; padding: 15px; position: relative; border: 2px solid transparent; }
         .player-panel.p1-active { border-color: #00ccff; box-shadow: 0 0 15px rgba(0,204,255,0.3); }
         .player-panel.p2-active { border-color: #ff3333; box-shadow: 0 0 15px rgba(255,51,51,0.3); }
 
-        .player-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .player-title { font-size: 20px; font-weight: bold; margin-bottom: 5px; }
         .p1-title { color: #00ccff; }
         .p2-title { color: #ff3333; }
 
         .char-selector { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 10px; }
-        .nav-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 30px; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
+        .nav-btn { background: rgba(255,255,255,0.2); border: none; color: white; font-size: 24px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
         .nav-btn:active { background: rgba(255,255,255,0.5); transform: scale(0.9); }
         
         .char-name-badge { background: #333; padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid white; font-size: 16px; text-align: center; flex: 1; margin: 0 10px; }
         
-        .char-img-box { width: 100%; height: 200px; border-radius: 15px; display: flex; justify-content: center; align-items: center; font-size: 14px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); }
+        /* 展示框 */
+        .char-img-box { width: 100%; height: 220px; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; position: relative; background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); }
         .char-img-box img { width: 100%; height: 100%; object-fit: contain; }
         
-        .char-ult { color: #ffd700; font-weight: bold; margin-top: 10px; font-size: 16px; text-shadow: 1px 1px 0 #000; }
-        .char-desc { font-size: 12px; color: #aaa; text-align: center; margin-top: 10px; line-height: 1.4; }
+        /* 属性条 */
+        .stats-box { width: 100%; margin-top: 10px; background: rgba(0,0,0,0.5); padding: 8px; border-radius: 10px; }
+        .stat-row { display: flex; align-items: center; margin-bottom: 4px; }
+        .stat-label { width: 35px; font-size: 12px; color: #aaa; }
+        .stat-bar { flex: 1; height: 8px; background: #333; border-radius: 4px; overflow: hidden; display: flex; gap: 2px; }
+        .stat-seg { flex: 1; background: #555; }
+        .stat-seg.active { background: #00ccff; }
+        .stat-seg.active.power { background: #ff3333; }
+        .stat-seg.active.hp { background: #00ff00; }
 
-        .select-footer { padding: 15px; text-align: center; }
-        .btn-start { background: #ffd700; color: #000; font-size: 22px; font-weight: bold; padding: 10px 60px; border-radius: 30px; border: none; cursor: pointer; box-shadow: 0 5px 0 #b38f00; transition: 0.1s; }
-        .btn-start:active { transform: translateY(5px); box-shadow: none; }
+        .char-ult { color: #ffd700; font-weight: bold; margin-top: 10px; font-size: 15px; text-shadow: 1px 1px 0 #000; }
+        .char-desc { font-size: 12px; color: #ddd; text-align: center; margin-top: 5px; line-height: 1.4; }
+
+        .select-footer { padding: 10px; text-align: center; }
+        .btn-start { background: #ffd700; color: #000; font-size: 20px; font-weight: bold; padding: 8px 50px; border-radius: 25px; border: none; cursor: pointer; box-shadow: 0 4px 0 #b38f00; transition: 0.1s; }
+        .btn-start:active { transform: translateY(4px); box-shadow: none; }
 
         /* ==================== 战斗界面 UI CSS ==================== */
         #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; display: none; }
@@ -61,13 +72,16 @@
         .hud-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .hud-name { font-size: 16px; font-weight: bold; color: #fff; text-shadow: 2px 2px 0 #000; }
         .hud-player.right .hud-name { text-align: right; }
+        
         .bar-container { height: 22px; background: #333; border: 2px solid #fff; border-radius: 11px; position: relative; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .bar-hp { height: 100%; background: linear-gradient(to right, #00ff00, #8bff00); width: 100%; transition: width 0.2s; }
         .hud-player.right .bar-hp { background: linear-gradient(to left, #00ff00, #8bff00); margin-left: auto; }
+        
         .bar-container.energy { height: 12px; border-radius: 6px; width: 80%; margin-top: 4px; }
         .hud-player.right .bar-container.energy { margin-left: auto; }
         .bar-energy { height: 100%; background: linear-gradient(to right, #00ccff, #00ffff); width: 0%; transition: width 0.1s; }
         .hud-player.right .bar-energy { background: linear-gradient(to left, #00ccff, #00ffff); margin-left: auto; }
+        
         .timer-box { background: #ffd700; color: #000; font-size: 30px; font-weight: bold; width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.5); margin-top: 5px; }
 
         /* 触屏控制器 */
@@ -92,10 +106,9 @@
 </head>
 <body>
     <div id="game-container">
-        <!-- 加载画面 -->
         <div id="loading-screen">
             <div class="loader"></div>
-            <h2 id="loading-text">正在加载角色图像 0/10...</h2>
+            <h2 id="loading-text">正在启动自动抠图引擎 0/10...</h2>
         </div>
 
         <canvas id="gameCanvas" width="1200" height="675"></canvas>
@@ -110,7 +123,8 @@
                         <div class="bar-container energy"><div class="bar-energy" id="p1-hud-energy"></div></div>
                     </div>
                 </div>
-                <div class="timer-box">99</div>
+                <!-- 倒计时 -->
+                <div class="timer-box" id="timer-text">99</div>
                 <div class="hud-player right">
                     <div class="hud-avatar" id="p2-hud-avatar"></div>
                     <div class="hud-bars">
@@ -155,7 +169,7 @@
         <div id="select-screen">
             <div class="select-header">
                 <h1>十五格斗</h1>
-                <p>测试版 v1.6 - 双方独立选人</p>
+                <p>测试版 v1.7 - 自动抠像 & 平衡性调整</p>
             </div>
             
             <div class="select-main">
@@ -167,6 +181,10 @@
                         <button class="nav-btn" onclick="UI.changeChar(1, 1)">▶</button>
                     </div>
                     <div class="char-img-box" id="p1-img-box"></div>
+                    
+                    <!-- 属性条还原 -->
+                    <div class="stats-box" id="p1-stats"></div>
+                    
                     <div class="char-ult" id="p1-ult-text">必杀「曼巴冲撞」</div>
                     <div class="char-desc" id="p1-desc"></div>
                 </div>
@@ -179,6 +197,10 @@
                         <button class="nav-btn" onclick="UI.changeChar(2, 1)">▶</button>
                     </div>
                     <div class="char-img-box" id="p2-img-box"></div>
+                    
+                    <!-- 属性条还原 -->
+                    <div class="stats-box" id="p2-stats"></div>
+
                     <div class="char-ult" id="p2-ult-text">必杀「生理恐吓」</div>
                     <div class="char-desc" id="p2-desc"></div>
                 </div>
@@ -191,21 +213,46 @@
     </div>
 
     <script>
-        const GAME_VERSION = "测试版v1.6";
+        const GAME_VERSION = "测试版v1.7";
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // ==========================================
+        // 角色数据 (修改了HP和伤害，让战斗持续更久)
+        // ==========================================
         const CHARACTERS = [
-            { id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", ultName: "曼巴冲撞", desc: "力量强机动慢。冲刺撞击。", maxHp: 120, speed: 200, jump: -800, atkDmg: 15, ultCost: 100 },
-            { id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg", img_cut: "char2.png", ultName: "打电动", desc: "随时间变强。数据流束缚。", maxHp: 100, speed: 300, jump: -900, atkDmg: 5, ultCost: 100 },
-            { id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg", img_cut: "char3.png", ultName: "大狗嚼嚼嚼", desc: "极速，随时间削弱。硬控撕咬。", maxHp: 90, speed: 450, jump: -1000, atkDmg: 5, ultCost: 100 },
-            { id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg", img_cut: "char4.png", ultName: "方天画戟", desc: "极高属性，随时间狂掉。丢画戟。", maxHp: 150, speed: 350, jump: -850, atkDmg: 20, ultCost: 100 },
-            { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", ultName: "生理恐吓", desc: "大招耗能极低。硬控并夺取属性。", maxHp: 60, speed: 180, jump: -700, atkDmg: 3, ultCost: 40 }
+            { id: 1, name: "辣子鸡", type: "力量型", color: "#ff4d4d", img: "char1.jpg", img_cut: "char1.png", stats: { power: 5, speed: 2, hp: 4 }, ultName: "曼巴冲撞", desc: "力量型，攻击力强，机动性与攻速慢。往前进方向进行冲撞。", maxHp: 400, speed: 200, jump: -800, atkDmg: 30, ultCost: 100 },
+            { id: 2, name: "迪客", type: "智慧型", color: "#4da6ff", img: "char2.jpg", img_cut: "char2.png", stats: { power: 2, speed: 3, hp: 3 }, ultName: "打电动", desc: "智慧型，攻击力弱，机动与攻速中等，但随着时间的逝去，攻击力会逐渐变强。大招数据流束缚敌人4秒。", maxHp: 350, speed: 300, jump: -900, atkDmg: 15, ultCost: 100 },
+            { id: 3, name: "黑色神秘生物", type: "敏捷型", color: "#333333", img: "char3.jpg", img_cut: "char3.png", stats: { power: 2, speed: 5, hp: 2 }, ultName: "大狗嚼嚼嚼", desc: "敏捷型。攻击力弱，机动攻速极强。大招锁定敌人进行硬控撕咬。", maxHp: 300, speed: 450, jump: -1000, atkDmg: 12, ultCost: 100 },
+            { id: 4, name: "吕布", type: "力量型", color: "#cc0000", img: "char4.jpg", img_cut: "char4.png", stats: { power: 5, speed: 4, hp: 5 }, ultName: "方天画戟", desc: "各项指标极强，但每过十秒获得buff减弱三分之一。大招丢出画戟减少对方四分之一血量。", maxHp: 500, speed: 350, jump: -850, atkDmg: 40, ultCost: 100 },
+            { id: 5, name: "神秘雌性双马尾", type: "精神型", color: "#ff99cc", img: "char5.jpg", img_cut: "char5.png", stats: { power: 1, speed: 1, hp: 1 }, ultName: "生理恐吓", desc: "所有属性极低。但大招所需能量值极低，可硬控对方一秒，并夺取对方少量血条与属性，但是自己大招可被打断。", maxHp: 250, speed: 180, jump: -700, atkDmg: 8, ultCost: 40 }
         ];
 
-        // ================= 预加载系统 =================
+        // ==========================================
+        // 自动抠像引擎 (处理白底)
+        // ==========================================
         const Assets = { images: {}, loaded: 0, total: 0 };
         
+        function removeWhiteBackground(img) {
+            const cvs = document.createElement('canvas');
+            cvs.width = img.naturalWidth; cvs.height = img.naturalHeight;
+            const c = cvs.getContext('2d');
+            c.drawImage(img, 0, 0);
+            const imgData = c.getImageData(0, 0, cvs.width, cvs.height);
+            const data = imgData.data;
+            
+            // 遍历像素，将接近白色的变成透明
+            for (let i = 0; i < data.length; i += 4) {
+                let r = data[i], g = data[i+1], b = data[i+2];
+                // 如果 RGB 都很高（接近白色）
+                if (r > 200 && g > 200 && b > 200) {
+                    data[i+3] = 0; // Alpha 设为透明
+                }
+            }
+            c.putImageData(imgData, 0, 0);
+            return cvs; // 返回处理后的 canvas
+        }
+
         function preloadAssets(callback) {
             let urls = [];
             CHARACTERS.forEach(c => { urls.push(c.img); urls.push(c.img_cut); });
@@ -215,25 +262,27 @@
                 let img = new Image();
                 img.src = url;
                 img.onload = () => {
-                    Assets.images[url] = img;
+                    // 如果是去抠图，就执行自动去白底
+                    if (url.endsWith('.png')) {
+                        Assets.images[url] = removeWhiteBackground(img);
+                    } else {
+                        Assets.images[url] = img;
+                    }
+                    
                     Assets.loaded++;
-                    document.getElementById('loading-text').innerText = `正在加载角色图像 ${Assets.loaded}/${Assets.total}...`;
+                    document.getElementById('loading-text').innerText = `正在加载与自动抠图 ${Assets.loaded}/${Assets.total}...`;
                     if (Assets.loaded === Assets.total) callback();
                 };
                 img.onerror = () => {
-                    // 如果缺图，也继续走流程
                     Assets.loaded++;
                     if (Assets.loaded === Assets.total) callback();
                 };
             });
         }
-        preloadAssets(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('select-screen').style.display = 'flex';
-            UI.init();
-        });
 
-        // ================= 输入控制 =================
+        // ==========================================
+        // 输入控制
+        // ==========================================
         const Input = {
             keys: {},
             init() {
@@ -255,33 +304,23 @@
 
         const STATE = { IDLE: 0, WALK: 1, JUMP: 2, BLOCK: 3, HIT: 4, ATTACK: 5, DEAD: 6, STUNNED: 7 };
 
-        // ================= 粒子系统 (火花) =================
+        // ================= 粒子系统 =================
         const Particles = {
             list: [],
             spawn(x, y, color, count = 5) {
                 for(let i=0; i<count; i++) {
-                    this.list.push({
-                        x: x, y: y,
-                        vx: (Math.random() - 0.5) * 600,
-                        vy: (Math.random() - 0.5) * 600,
-                        life: 1, color: color
-                    });
+                    this.list.push({ x: x, y: y, vx: (Math.random() - 0.5) * 800, vy: (Math.random() - 0.5) * 800, life: 1, color: color });
                 }
             },
             update() {
                 for(let i = this.list.length - 1; i >= 0; i--) {
                     let p = this.list[i];
-                    p.x += p.vx / 60; p.y += p.vy / 60;
-                    p.life -= 0.05;
+                    p.x += p.vx / 60; p.y += p.vy / 60; p.life -= 0.05;
                     if(p.life <= 0) this.list.splice(i, 1);
                 }
             },
             render(ctx) {
-                this.list.forEach(p => {
-                    ctx.fillStyle = p.color;
-                    ctx.globalAlpha = p.life;
-                    ctx.fillRect(p.x, p.y, 4, 4);
-                });
+                this.list.forEach(p => { ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fillRect(p.x, p.y, 6, 6); });
                 ctx.globalAlpha = 1;
             }
         };
@@ -304,17 +343,15 @@
                 this.isP1 = isP1;
                 this.config = CHARACTERS.find(c => c.id === charId);
                 this.x = isP1 ? 350 : 850; this.y = 550; this.vx = 0; this.vy = 0;
-                this.width = 100; this.height = 160;
-                this.facing = isP1 ? 1 : -1;
+                this.width = 100; this.height = 160; this.facing = isP1 ? 1 : -1;
                 this.maxHp = this.config.maxHp; this.hp = this.maxHp;
                 this.energy = 0; this.maxEnergy = this.config.ultCost;
                 this.state = STATE.IDLE; this.stateTimer = 0; this.hitstop = 0;
                 this.currentAtk = this.config.atkDmg; this.currentSpeed = this.config.speed;
                 this.matchTime = 0; this.stunTimer = 0; this.autoAttackTimer = 0; this.buffTickTimer = 0;
                 this.hasHitThisAttack = false; this.attackData = null; this.isUltInterrupted = false; 
-                
                 this.flashTimer = 0; this.breathTime = Math.random() * 10; this.yOffset = 0; 
-                this.trail = []; // 残影队列
+                this.trail = [];
             }
 
             update() {
@@ -348,7 +385,6 @@
                 else if (this.state === STATE.BLOCK) this.yOffset = 2;
                 else this.yOffset = 0;
 
-                // 残影更新
                 if (Math.abs(this.vx) > 300 || this.state === STATE.JUMP) {
                     this.trail.unshift({ x: this.x, y: this.y, facing: this.facing });
                     if (this.trail.length > 5) this.trail.pop();
@@ -358,11 +394,11 @@
             }
 
             handlePassiveSkills() {
-                if (this.config.id === 2) this.currentAtk = this.config.atkDmg + Math.floor(this.matchTime / 180);
+                if (this.config.id === 2) this.currentAtk = this.config.atkDmg + Math.floor(this.matchTime / 120);
                 if (this.config.id === 3) {
                     const decay = Math.floor(this.matchTime / 240);
-                    this.currentSpeed = Math.max(150, this.config.speed - decay * 50);
-                    this.currentAtk = this.config.atkDmg + decay * 3;
+                    this.currentSpeed = Math.max(150, this.config.speed - decay * 40);
+                    this.currentAtk = this.config.atkDmg + decay * 5;
                 }
                 if (this.config.id === 4) {
                     this.buffTickTimer++;
@@ -446,7 +482,11 @@
                     this.isUltInterrupted = true; this.changeState(STATE.HIT); this.stateTimer = 30; this.vx = attacker.facing * 400;
                     this.hitstop = 10; attacker.hitstop = 10; this.flashTimer = 10; return; 
                 }
-                if (type === "halberd") this.hp -= this.maxHp * 0.20; else this.hp -= attackData.dmg;
+                // 防御减伤
+                if (type === "halberd") this.hp -= this.maxHp * 0.20; 
+                else if (this.state === STATE.BLOCK) this.hp -= attackData.dmg * 0.2; // 防御只扣20%
+                else this.hp -= attackData.dmg;
+
                 this.energy = Math.min(this.maxEnergy, this.energy + 15);
                 this.hitstop = 6; attacker.hitstop = 6;
                 this.flashTimer = 6; 
@@ -458,41 +498,27 @@
             applyStun(frames) { this.changeState(STATE.STUNNED); this.stunTimer = frames; }
 
             render() {
-                const hurt = this.getHurtbox();
-
-                // 1. 绘制残影
                 this.trail.forEach((t, i) => {
                     ctx.globalAlpha = 0.2 * (i / this.trail.length);
                     this.drawBody(t.x, t.y, t.facing, true);
                 });
                 ctx.globalAlpha = 1;
 
-                // 2. 绘制本体
                 if (this.flashTimer > 0) ctx.filter = 'brightness(3) grayscale(1)';
                 else ctx.filter = 'none';
                 this.drawBody(this.x, this.y + this.yOffset, this.facing, false);
                 ctx.filter = 'none';
 
-                // 3. 绘制防御护盾
                 if (this.state === STATE.BLOCK) {
-                    ctx.save();
-                    ctx.translate(this.x + this.facing * 60, this.y + this.yOffset - 80);
-                    ctx.beginPath();
-                    ctx.arc(0, 0, 90, -Math.PI/2, Math.PI/2, this.facing === -1);
-                    
-                    // 呼吸流光
+                    ctx.save(); ctx.translate(this.x + this.facing * 60, this.y + this.yOffset - 80);
+                    ctx.beginPath(); ctx.arc(0, 0, 90, -Math.PI/2, Math.PI/2, this.facing === -1);
                     let shieldAlpha = 0.5 + Math.sin(Date.now() / 150) * 0.2;
-                    ctx.strokeStyle = `rgba(0, 200, 255, ${shieldAlpha})`;
-                    ctx.lineWidth = 6;
-                    ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
-                    ctx.stroke();
-                    
-                    ctx.fillStyle = `rgba(0, 200, 255, 0.15)`;
-                    ctx.fill();
+                    ctx.strokeStyle = `rgba(0, 200, 255, ${shieldAlpha})`; ctx.lineWidth = 6;
+                    ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff'; ctx.stroke();
+                    ctx.fillStyle = `rgba(0, 200, 255, 0.15)`; ctx.fill();
                     ctx.restore();
                 }
 
-                // 4. Debug 判定框
                 if (this.state === STATE.ATTACK) {
                     const hit = this.getHitbox();
                     if (hit) { ctx.strokeStyle = 'red'; ctx.lineWidth = 2; ctx.strokeRect(hit.x, hit.y, hit.w, hit.h); }
@@ -501,11 +527,11 @@
 
             drawBody(x, y, facing, isGhost) {
                 const hurt = this.getHurtbox();
+                // 因为经过了自动抠像，处理过的对象实际上是 Canvas 而不是 Image，所以去 Assets.images 里拿
                 const img = Assets.images[this.config.img_cut];
                 
-                if (img && img.complete && img.naturalWidth > 0) {
-                    ctx.save();
-                    ctx.translate(x, y);
+                if (img) {
+                    ctx.save(); ctx.translate(x, y);
                     let scaleX = 1, scaleY = 1;
                     if (!isGhost) {
                         if (this.state === STATE.ATTACK) { scaleX = 1.1; scaleY = 0.9; }
@@ -527,12 +553,13 @@
 
         const Game = {
             p1: null, p2: null, projectiles: [], isRunning: false, matchOver: false,
-            shakeTimer: 0, // 屏幕震动
+            shakeTimer: 0, timeLeft: 99, frameTimer: 0, // 倒计时相关
             
             init(c1, c2) {
                 this.p1 = new Fighter(true, c1); this.p2 = new Fighter(false, c2);
                 this.projectiles = []; this.isRunning = true; this.matchOver = false;
-                this.shakeTimer = 0;
+                this.shakeTimer = 0; this.timeLeft = 99; this.frameTimer = 0;
+                document.getElementById('timer-text').innerText = this.timeLeft;
                 
                 document.getElementById('battle-ui').style.display = 'block';
                 document.getElementById('p1-hud-name').innerText = this.p1.config.name;
@@ -552,7 +579,7 @@
 
             triggerFearEffect(caster) {
                 const target = caster.isP1 ? this.p2 : this.p1; if (target.state === STATE.DEAD) return;
-                target.applyStun(60); let drain = 15;
+                target.applyStun(60); let drain = 20;
                 target.hp = Math.max(0, target.hp - drain); caster.hp = Math.min(caster.maxHp, caster.hp + drain);
                 target.currentAtk = Math.max(1, target.currentAtk - 2); target.currentSpeed = Math.max(50, target.currentSpeed - 15);
                 caster.currentAtk += 2; caster.currentSpeed += 15;
@@ -561,12 +588,26 @@
             },
             triggerGlobalStun(attacker) {
                 const target = attacker.isP1 ? this.p2 : this.p1;
-                if (Math.abs(attacker.x - target.x) < 250) { target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 15; target.flashTimer = 10; }
+                if (Math.abs(attacker.x - target.x) < 250) { target.applyStun(60); target.autoAttackTimer = 60; target.hp -= 20; target.flashTimer = 10; }
             },
 
             tick() {
                 if (!this.isRunning || this.matchOver) return;
                 if (this.shakeTimer > 0) this.shakeTimer--;
+
+                // 倒计时逻辑 (60帧 = 1秒)
+                this.frameTimer++;
+                if (this.frameTimer >= 60) {
+                    this.frameTimer = 0;
+                    this.timeLeft--;
+                    document.getElementById('timer-text').innerText = this.timeLeft;
+                    if (this.timeLeft <= 0) {
+                        this.matchOver = true;
+                        let winner = this.p1.hp > this.p2.hp ? "1P" : (this.p2.hp > this.p1.hp ? "2P" : "平局");
+                        setTimeout(() => { alert(`时间到！${winner} 获胜!\n点击确定返回选人`); UI.showSelect(); }, 100);
+                        return;
+                    }
+                }
 
                 this.p1.update(); this.p2.update();
                 this.projectiles.forEach(p => p.update());
@@ -578,7 +619,7 @@
                     const target = p.owner === this.p1 ? this.p2 : this.p1;
                     if (this.checkAABB(p.getHurtbox(), target.getHurtbox())) {
                         p.active = false;
-                        if (p.type === 'data') { target.applyStun(120); target.hp -= 5; target.flashTimer = 10; }
+                        if (p.type === 'data') { target.applyStun(120); target.hp -= 10; target.flashTimer = 10; }
                         else if (p.type === 'halberd') target.receiveHit(p.owner, { dmg: 0 }, "halberd");
                         
                         Particles.spawn(p.x, p.y, '#fff', 10);
@@ -603,7 +644,6 @@
                     attacker.hasHitThisAttack = true; 
                     target.receiveHit(attacker, attacker.attackData);
                     
-                    // 击打特效与屏幕震动
                     Particles.spawn((attacker.x + target.x)/2, target.y - 80, target.state === STATE.BLOCK ? '#00ffff' : '#ff0000', 15);
                     this.shakeTimer = target.state === STATE.BLOCK ? 3 : 8;
                 }
@@ -613,7 +653,6 @@
 
             render() {
                 ctx.save();
-                // 处理屏幕震动
                 if (this.shakeTimer > 0) {
                     let dx = (Math.random() - 0.5) * this.shakeTimer * 2;
                     let dy = (Math.random() - 0.5) * this.shakeTimer * 2;
@@ -621,15 +660,11 @@
                 }
 
                 let bgGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-                bgGrad.addColorStop(0, '#1a1a2e');
-                bgGrad.addColorStop(1, '#0f0f1b');
+                bgGrad.addColorStop(0, '#1a1a2e'); bgGrad.addColorStop(1, '#0f0f1b');
                 ctx.fillStyle = bgGrad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
                 ctx.fillStyle = '#222'; ctx.fillRect(0, 550, canvas.width, 125);
                 ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
-                for(let i=0; i<canvas.width; i+=100) {
-                    ctx.beginPath(); ctx.moveTo(i, 550); ctx.lineTo(i-100, 675); ctx.stroke();
-                }
+                for(let i=0; i<canvas.width; i+=100) { ctx.beginPath(); ctx.moveTo(i, 550); ctx.lineTo(i-100, 675); ctx.stroke(); }
                 
                 if (this.isRunning) {
                     this.p1.render(); this.p2.render();
@@ -640,7 +675,6 @@
                         const h = p.getHurtbox(); ctx.fillRect(-h.w/2, -h.h/2, h.w, h.h);
                         ctx.restore();
                     });
-                    
                     Particles.render(ctx);
                 }
                 ctx.restore();
@@ -649,9 +683,7 @@
 
         const UI = {
             p1Index: 0, p2Index: 4,
-            
             init() { this.updateShowcases(); },
-
             changeChar(player, dir) {
                 if (player === 1) this.p1Index = (this.p1Index + dir + CHARACTERS.length) % CHARACTERS.length;
                 else this.p2Index = (this.p2Index + dir + CHARACTERS.length) % CHARACTERS.length;
@@ -662,7 +694,9 @@
                 const c1 = CHARACTERS[this.p1Index];
                 document.getElementById('p1-name-badge').innerText = c1.name;
                 document.getElementById('p1-name-badge').style.background = c1.color;
+                // 选人界面的图依旧用原图（带背景）
                 document.getElementById('p1-img-box').innerHTML = `<img src="${c1.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c1.color}'">`;
+                document.getElementById('p1-stats').innerHTML = this.getStatsHTML(c1);
                 document.getElementById('p1-ult-text').innerText = `必杀「${c1.ultName}」`;
                 document.getElementById('p1-desc').innerText = c1.desc;
                 
@@ -670,8 +704,23 @@
                 document.getElementById('p2-name-badge').innerText = c2.name;
                 document.getElementById('p2-name-badge').style.background = c2.color;
                 document.getElementById('p2-img-box').innerHTML = `<img src="${c2.img}" onerror="this.style.display='none'; this.parentElement.style.background='${c2.color}'">`;
+                document.getElementById('p2-stats').innerHTML = this.getStatsHTML(c2);
                 document.getElementById('p2-ult-text').innerText = `必杀「${c2.ultName}」`;
                 document.getElementById('p2-desc').innerText = c2.desc;
+            },
+
+            getStatsHTML(c) {
+                let html = '';
+                html += `<div class="stat-row"><div class="stat-label">速度</div><div class="stat-bar">`;
+                for(let i=1; i<=5; i++) html += `<div class="stat-seg ${i <= c.stats.speed ? 'active' : ''}"></div>`;
+                html += `</div></div>`;
+                html += `<div class="stat-row"><div class="stat-label">力量</div><div class="stat-bar">`;
+                for(let i=1; i<=5; i++) html += `<div class="stat-seg ${i <= c.stats.power ? 'active power' : ''}"></div>`;
+                html += `</div></div>`;
+                html += `<div class="stat-row"><div class="stat-label">体力</div><div class="stat-bar">`;
+                for(let i=1; i<=5; i++) html += `<div class="stat-seg ${i <= c.stats.hp ? 'active hp' : ''}"></div>`;
+                html += `</div></div>`;
+                return html;
             },
 
             showSelect() {
@@ -690,7 +739,6 @@
         };
 
         let acc = 0, lastTime = performance.now();
-
         function loop(time) {
             const dt = (time - lastTime) / 1000; lastTime = time;
             if (Game.isRunning && !Game.matchOver) {
@@ -701,7 +749,13 @@
             requestAnimationFrame(loop);
         }
 
-        requestAnimationFrame(loop);
+        // 启动流程
+        preloadAssets(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('select-screen').style.display = 'flex';
+            UI.init();
+            requestAnimationFrame(loop);
+        });
     </script>
 </body>
-    </html>
+</html>
